@@ -986,6 +986,8 @@ defineExpose({ play })
                 v-if="hasProgressIcon"
                 :src="progressIcon || ''"
                 alt=""
+                draggable="false"
+                @dragstart.prevent
                 @error="progressIconError = true"
               >
             </span>
@@ -1574,6 +1576,9 @@ defineExpose({ play })
   width: 100%;
   height: 100%;
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .progress-line:hover .progress-thumb,
 .player-stage.is-seeking .progress-thumb {
