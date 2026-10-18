@@ -114,7 +114,10 @@ async function submit() {
           <AppIcon name="arrowLeft" :size="14" />
           返回放映室
         </NuxtLink>
-        <span class="topbar-note">MEMBER REGISTRATION</span>
+        <div class="auth-top-actions">
+          <ThemeToggle />
+          <span class="topbar-note">MEMBER REGISTRATION</span>
+        </div>
       </div>
 
       <div class="auth-card">
@@ -385,6 +388,11 @@ async function submit() {
 }
 .back-home:hover {
   color: var(--ink);
+}
+.auth-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 13px;
 }
 .topbar-note {
   color: var(--muted-weak);

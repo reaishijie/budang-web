@@ -43,6 +43,8 @@ const icons: Record<string, string> = {
   chevronLeft: '<path d="m14.5 5-7 7 7 7"/>',
   chevronRight: '<path d="m9.5 5 7 7-7 7"/>',
   spark: '<path d="M12 3.5c.6 4.5 2.5 6.4 7 7-4.5.6-6.4 2.5-7 7-.6-4.5-2.5-6.4-7-7 4.5-.6 6.4-2.5 7-7Z" fill="currentColor" stroke="none"/><path d="M19 15.5c.3 2 1.1 2.8 3 3-1.9.3-2.7 1.1-3 3-.3-1.9-1.1-2.7-3-3 1.9-.2 2.7-1 3-3Z" fill="currentColor" stroke="none"/>',
+  sun: '<circle cx="12" cy="12" r="4.1"/><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>',
+  moon: '<path d="M20.2 15.6A8.2 8.2 0 0 1 8.4 3.8 8.6 8.6 0 1 0 20.2 15.6Z"/>',
   film: '<rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M8 5v14M16 5v14M3.5 9h4.5M16 9h4.5M3.5 15h4.5M16 15h4.5"/>',
   energy: '<path d="M13.5 2.5 5 13.5h5.5L10 21.5l9-11.5h-5.5l.5-7.5Z"/>',
   external: '<path d="M14 4h6v6M20 4l-8.5 8.5"/><path d="M18 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5.5"/>',

@@ -7,12 +7,25 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'zh-CN' },
       meta: [
-        { name: 'theme-color', content: '#08090c' },
-        { name: 'color-scheme', content: 'dark' },
+        { name: 'color-scheme', content: 'dark light' },
+      ],
+      script: [
+        {
+          tagPosition: 'head',
+          innerHTML: `(() => {
+  try {
+    const stored = localStorage.getItem('video-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = stored === 'light' || stored === 'dark' ? stored : (prefersDark ? 'dark' : 'light');
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  } catch {}
+})()`,
+        },
       ],
     },
   },
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', '~/assets/css/theme-light.css'],
   runtimeConfig: {
     apiBaseUrl: 'http://localhost:3000',
     public: {

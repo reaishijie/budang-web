@@ -104,6 +104,8 @@ onBeforeUnmount(() => {
           <span class="search-key" aria-hidden="true">/</span>
         </form>
 
+        <ThemeToggle />
+
         <NuxtLink v-if="canUpload" class="upload-entry" to="/upload">
           <AppIcon name="upload" :size="14" />
           <span>上传</span>

@@ -18,6 +18,7 @@ useHead({ title })
 <template>
   <div class="error-page">
     <div class="error-glow" aria-hidden="true" />
+    <ThemeToggle class="error-theme" />
     <div class="error-card">
       <span class="error-code">{{ error.statusCode || 500 }}</span>
       <p class="eyebrow">PROJECTION INTERRUPTED</p>
@@ -43,6 +44,12 @@ useHead({ title })
   overflow: hidden;
   place-items: center;
   padding: 30px;
+}
+.error-theme {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 2;
 }
 .error-glow {
   position: absolute;
