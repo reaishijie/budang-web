@@ -2,7 +2,7 @@
 
 <img src="docs/screenshots/logo.png" alt="补档" width="240">
 
-基于 **Nuxt 4 + Vue 3** 的视频站前端，对接主仓库根目录（`..`）的视频站后端。架构参考 `navigation-web` 的 **Nuxt BFF + HttpOnly Cookie** 方案，但 UI 为独立设计的暗色电影放映室风格：暖琥珀光、编辑感衬线字、胶片颗粒与编号片单。
+基于 **Nuxt 4 + Vue 3** 的视频站前端，对接同级后端目录（`../video`）的视频站服务。架构参考 `navigation-web` 的 **Nuxt BFF + HttpOnly Cookie** 方案，但 UI 为独立设计的暗色电影放映室风格：暖琥珀光、编辑感衬线字、胶片颗粒与编号片单。
 
 ## 界面预览
 
@@ -43,7 +43,7 @@
 - **双主题**：暗色 / 亮色切换，首次跟随系统偏好并持久化选择；所有公开页、账号页与后台均已适配。
 - **体验**：响应式布局、Toast、模态框、空状态、加载骨架、路由鉴权、SSR SEO、JSON-LD。
 
-前端位于主仓库 `video-web/` 目录，后端位于仓库根目录，统一版本管理。
+前端位于后端项目的同级目录 `../video-web/`，后端源码位于 `../video`，两个项目独立管理。
 
 ## 架构
 
@@ -87,10 +87,10 @@ video-web/
 
 ## 本地开发
 
-先启动主仓库根目录（`..`）的后端：
+先启动同级后端目录（`../video`）的后端：
 
 ```bash
-cd ..
+cd ../video
 bun run dev
 # http://localhost:3000
 ```
