@@ -301,23 +301,39 @@ html[data-theme='light'] body .rank-thumb-fallback {
   background: linear-gradient(140deg, #eee6d8, #e3d9c8);
 }
 html[data-theme='light'] body .collection-card {
-  color: #f3efe4;
+  color: var(--ink);
+  border-color: var(--line);
+  background:
+    radial-gradient(circle at 84% 12%, hsl(var(--collection-hue) 60% 62% / 0.22), transparent 48%),
+    linear-gradient(145deg, hsl(var(--collection-hue) 42% 94%), #fbf8f1 74%);
+}
+html[data-theme='light'] body .collection-card:hover {
+  border-color: var(--line-strong);
+}
+html[data-theme='light'] body .collection-card .collection-index,
+html[data-theme='light'] body .collection-card .collection-copy small {
+  color: var(--muted-weak);
+}
+html[data-theme='light'] body .collection-card .collection-copy span,
+html[data-theme='light'] body .collection-card .collection-meta {
+  color: var(--muted);
+}
+html[data-theme='light'] body .collection-card .collection-meta {
+  border-top-color: var(--line);
+}
+html[data-theme='light'] body .collection-card .collection-meta svg {
+  color: var(--amber-bright);
 }
 html[data-theme='light'] body .upload-banner {
   color: var(--ink);
-  --ink: #f3efe4;
-  --ink-soft: #c7c2b6;
-  --muted: #a19b8e;
-  --muted-weak: #7d776c;
-  --line: rgba(243, 239, 228, 0.11);
-  --line-strong: rgba(243, 239, 228, 0.18);
+  border-color: var(--line);
   background:
-    radial-gradient(circle at 80% 10%, rgba(243, 184, 95, 0.12), transparent 42%),
-    linear-gradient(140deg, rgba(243, 239, 228, 0.04), transparent 50%),
-    #17140e;
+    radial-gradient(circle at 80% 10%, rgba(169, 103, 22, 0.08), transparent 42%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.35)),
+    var(--surface-2);
 }
 html[data-theme='light'] body .upload-banner .section-kicker {
-  color: #f3b85f;
+  color: var(--amber);
 }
 html[data-theme='light'] body .marquee {
   background: rgba(255, 255, 255, 0.25);
