@@ -22,7 +22,7 @@ export type VoteType = 'LIKE' | 'DISLIKE'
 export type DanmakuMode = 'SCROLL' | 'TOP' | 'BOTTOM'
 export type ConfigVisibility = 'PUBLIC' | 'USER' | 'ADMIN'
 export type EnergyTransactionType = 'ADMIN_ADJUST' | 'INITIAL_BONUS' | 'UPLOAD_COST' | 'REWARD' | 'PENALTY' | 'REFUND'
-export type UploadPurpose = 'VIDEO' | 'IMAGE'
+export type UploadPurpose = 'VIDEO' | 'IMAGE' | 'PLAYER_ICON'
 
 export interface AuthUser {
   id: number

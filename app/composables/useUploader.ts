@@ -2,6 +2,7 @@ import { useApi } from '~/composables/useApi'
 import type { FileAsset, PresignResponse, UploadPurpose } from '~/types'
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const PLAYER_ICON_TYPES = [...IMAGE_TYPES, 'image/svg+xml']
 const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/ogg']
 
 export function useUploader() {
@@ -17,6 +18,9 @@ export function useUploader() {
     }
     if (purpose === 'IMAGE' && !IMAGE_TYPES.includes(file.type)) {
       throw new Error('仅支持 JPEG / PNG / WebP / GIF 图片')
+    }
+    if (purpose === 'PLAYER_ICON' && !PLAYER_ICON_TYPES.includes(file.type)) {
+      throw new Error('进度图标仅支持 JPEG / PNG / WebP / GIF / SVG')
     }
 
     const presign = await api.post<PresignResponse>('/api/backend/api/uploads/presign', {

@@ -137,8 +137,8 @@ function chooseCover(file: File | undefined) {
 function choosePlayerIcon(file: File | undefined) {
   if (!file) return
   errorMessage.value = ''
-  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
-    errorMessage.value = '进度图标请选择 JPEG / PNG / WebP / GIF 图片'
+  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'].includes(file.type)) {
+    errorMessage.value = '进度图标请选择 JPEG / PNG / WebP / GIF / SVG 图片'
     return
   }
   if (file.size > maxImageSize.value) {
@@ -263,7 +263,7 @@ async function submit() {
 
     if (isAdmin.value) {
       if (playerIconFile.value) {
-        const uploadedIcon = await uploader.upload(playerIconFile.value, 'IMAGE', (percent) => {
+        const uploadedIcon = await uploader.upload(playerIconFile.value, 'PLAYER_ICON', (percent) => {
           uploadPercent.value = Math.max(uploadPercent.value, 90 + Math.round(percent * 0.08))
         })
         if (!uploadedIcon.publicUrl) {
@@ -433,14 +433,14 @@ useSeoMeta({
               </div>
               <div class="player-icon-copy">
                 <strong>播放进度图标</strong>
-                <span>仅管理员可设置。上传后会替换播放进度条上的圆形拖动标志，建议使用透明背景的正方形 PNG / WebP，最大 {{ formatBytes(maxImageSize) }}。</span>
+                <span>仅管理员可设置。上传后会替换播放进度条上的圆形拖动标志，支持 PNG / WebP / GIF / SVG，建议使用透明背景的正方形图标，最大 {{ formatBytes(maxImageSize) }}。</span>
                 <div class="cover-actions">
                   <button class="btn btn-subtle btn-sm" type="button" @click="playerIconInput?.click()">
                     <AppIcon name="upload" :size="13" />
                     {{ playerIconFile ? '更换图标' : '上传图标' }}
                   </button>
                   <button v-if="playerIconFile || form.playerIconUrl" class="text-button" type="button" @click="resetPlayerIcon">移除</button>
-                  <input ref="playerIconInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="onPlayerIconInput">
+                  <input ref="playerIconInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg" @change="onPlayerIconInput">
                 </div>
               </div>
             </div>

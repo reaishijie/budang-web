@@ -114,8 +114,8 @@ function selectCover(file: File | undefined) {
 
 function selectPlayerIcon(file: File | undefined) {
   if (!file) return
-  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
-    toast.error('进度图标请选择 JPEG / PNG / WebP / GIF 图片')
+  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'].includes(file.type)) {
+    toast.error('进度图标请选择 JPEG / PNG / WebP / GIF / SVG 图片')
     return
   }
   if (file.size > maxImageSize) {
@@ -200,7 +200,7 @@ async function save() {
     }
 
     if (playerIconFile.value) {
-      const uploadedIcon = await uploader.upload(playerIconFile.value, 'IMAGE')
+      const uploadedIcon = await uploader.upload(playerIconFile.value, 'PLAYER_ICON')
       if (!uploadedIcon.publicUrl) {
         throw new Error('对象存储未配置公开访问地址，请改用进度图标 URL')
       }
@@ -376,14 +376,14 @@ useSeoMeta({
             </div>
             <div class="edit-image-copy">
               <strong>播放进度图标</strong>
-              <p>仅管理员可设置。可选择内置图标，或上传透明背景的正方形 PNG / WebP。</p>
+              <p>仅管理员可设置。可选择内置图标，或上传透明背景的正方形 PNG / WebP / GIF / SVG。</p>
               <div class="edit-image-actions">
                 <button class="btn btn-subtle btn-sm" type="button" @click="playerIconInput?.click()">
                   <AppIcon name="upload" :size="13" />
                   上传图标
                 </button>
                 <button v-if="previewPlayerIcon" class="text-button" type="button" @click="resetPlayerIcon">移除</button>
-                <input ref="playerIconInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="onPlayerIconInput">
+                <input ref="playerIconInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg" @change="onPlayerIconInput">
               </div>
             </div>
           </div>
