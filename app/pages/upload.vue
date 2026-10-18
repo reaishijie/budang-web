@@ -4,6 +4,7 @@ import { useUploader } from '~/composables/useUploader'
 import { useToast } from '~/composables/useToast'
 import { formatBytes, formatDuration } from '~/utils/format'
 import type { Category, ConfigItem, TagItem } from '~/types'
+import { PLAYER_ICON_PRESETS } from '~/utils/playerIcons'
 
 const auth = useAuth()
 const { canUpload, isAdmin } = auth
@@ -78,6 +79,10 @@ function isHttpUrl(value: string) {
   } catch {
     return false
   }
+}
+
+function isPlayerIconUrl(value: string) {
+  return value.startsWith('/player-icons/') || isHttpUrl(value)
 }
 
 function revokeVideoPreview() {
@@ -186,6 +191,12 @@ function resetPlayerIcon() {
   form.playerIconUrl = ''
 }
 
+function selectPlayerIconPreset(url: string) {
+  revokePlayerIconPreview()
+  playerIconFile.value = null
+  form.playerIconUrl = url
+}
+
 function switchMode(next: 'upload' | 'external') {
   mode.value = next
   errorMessage.value = ''
@@ -215,8 +226,8 @@ async function submit() {
     errorMessage.value = '封面地址必须是 http(s) 链接，或改为上传图片'
     return
   }
-  if (!playerIconFile.value && form.playerIconUrl.trim() && !isHttpUrl(form.playerIconUrl.trim())) {
-    errorMessage.value = '进度图标地址必须是 http(s) 链接，或改为上传图片'
+  if (isAdmin.value && !playerIconFile.value && form.playerIconUrl.trim() && !isPlayerIconUrl(form.playerIconUrl.trim())) {
+    errorMessage.value = '进度图标地址必须是 http(s) 链接或内置图标'
     return
   }
 
@@ -250,16 +261,18 @@ async function submit() {
       if (form.coverUrl.trim()) body.coverUrl = form.coverUrl.trim()
     }
 
-    if (playerIconFile.value) {
-      const uploadedIcon = await uploader.upload(playerIconFile.value, 'IMAGE', (percent) => {
-        uploadPercent.value = Math.max(uploadPercent.value, 90 + Math.round(percent * 0.08))
-      })
-      if (!uploadedIcon.publicUrl) {
-        throw new Error('对象存储未配置公开访问地址，请改用进度图标 URL')
+    if (isAdmin.value) {
+      if (playerIconFile.value) {
+        const uploadedIcon = await uploader.upload(playerIconFile.value, 'IMAGE', (percent) => {
+          uploadPercent.value = Math.max(uploadPercent.value, 90 + Math.round(percent * 0.08))
+        })
+        if (!uploadedIcon.publicUrl) {
+          throw new Error('对象存储未配置公开访问地址，请改用进度图标 URL')
+        }
+        body.playerIconUrl = uploadedIcon.publicUrl
+      } else if (form.playerIconUrl.trim()) {
+        body.playerIconUrl = form.playerIconUrl.trim()
       }
-      body.playerIconUrl = uploadedIcon.publicUrl
-    } else if (form.playerIconUrl.trim()) {
-      body.playerIconUrl = form.playerIconUrl.trim()
     }
 
     uploadPercent.value = 98
@@ -412,6 +425,7 @@ useSeoMeta({
               </div>
             </template>
 
+            <template v-if="isAdmin">
             <div class="player-icon-upload-row">
               <div class="player-icon-preview">
                 <img v-if="previewPlayerIcon" :src="previewPlayerIcon" alt="播放进度图标预览">
@@ -419,7 +433,7 @@ useSeoMeta({
               </div>
               <div class="player-icon-copy">
                 <strong>播放进度图标</strong>
-                <span>可选。上传后会替换播放进度条上的圆形拖动标志，建议使用透明背景的正方形 PNG / WebP，最大 {{ formatBytes(maxImageSize) }}。</span>
+                <span>仅管理员可设置。上传后会替换播放进度条上的圆形拖动标志，建议使用透明背景的正方形 PNG / WebP，最大 {{ formatBytes(maxImageSize) }}。</span>
                 <div class="cover-actions">
                   <button class="btn btn-subtle btn-sm" type="button" @click="playerIconInput?.click()">
                     <AppIcon name="upload" :size="13" />
@@ -431,13 +445,28 @@ useSeoMeta({
               </div>
             </div>
 
+            <div class="player-icon-presets">
+              <button
+                v-for="preset in PLAYER_ICON_PRESETS"
+                :key="preset.key"
+                type="button"
+                class="player-icon-preset"
+                :class="{ 'is-active': form.playerIconUrl === preset.url && !playerIconFile }"
+                @click="selectPlayerIconPreset(preset.url)"
+              >
+                <img :src="preset.url" :alt="preset.label">
+                <span>{{ preset.label }}</span>
+              </button>
+            </div>
+
             <div class="field">
               <label class="field-label" for="player-icon-url">
-                播放进度图标地址
-                <span class="field-label__hint">可选，上传图标后忽略</span>
+                自定义进度图标地址
+                <span class="field-label__hint">可选，上传图标或选择预设后忽略</span>
               </label>
-              <input id="player-icon-url" v-model="form.playerIconUrl" class="input" type="url" placeholder="https://example.com/progress-icon.png">
+              <input id="player-icon-url" v-model="form.playerIconUrl" class="input" type="text" inputmode="url" placeholder="https://example.com/progress-icon.png">
             </div>
+            </template>
           </section>
 
           <section class="form-section panel">
@@ -898,6 +927,40 @@ useSeoMeta({
   color: var(--amber-bright);
   background: rgba(243, 184, 95, 0.1);
 }
+.player-icon-presets {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+  margin: 2px 0 1px;
+}
+.player-icon-preset {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 5px;
+  padding: 7px 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 8px;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, transform 180ms var(--ease-out);
+}
+.player-icon-preset img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.player-icon-preset:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+.player-icon-preset.is-active {
+  border-color: rgba(169, 103, 22, 0.45);
+  color: var(--amber-bright);
+  background: rgba(169, 103, 22, 0.08);
+}
 .player-icon-copy {
   display: grid;
   min-width: 0;
@@ -1131,6 +1194,12 @@ useSeoMeta({
   }
   .preview-poster {
     aspect-ratio: 16 / 8;
+  }
+}
+
+@media (max-width: 620px) {
+  .player-icon-presets {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

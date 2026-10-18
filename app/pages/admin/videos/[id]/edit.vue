@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import type { VideoDetail } from '~/types'
 import { formatBytes, formatCount, formatDate, formatDuration, VIDEO_STATUS_LABEL, videoStatusTone } from '~/utils/format'
+import { PLAYER_ICON_PRESETS } from '~/utils/playerIcons'
 import { useToast } from '~/composables/useToast'
 
 definePageMeta({ layout: 'admin' })
@@ -92,6 +93,10 @@ function isHttpUrl(value: string) {
   }
 }
 
+function isPlayerIconUrl(value: string) {
+  return value.startsWith('/player-icons/') || isHttpUrl(value)
+}
+
 function selectCover(file: File | undefined) {
   if (!file) return
   if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
@@ -148,6 +153,13 @@ function resetPlayerIcon() {
   form.playerIconUrl = ''
 }
 
+function selectPlayerIconPreset(url: string) {
+  if (playerIconPreview.value) URL.revokeObjectURL(playerIconPreview.value)
+  playerIconPreview.value = ''
+  playerIconFile.value = null
+  form.playerIconUrl = url
+}
+
 function toggleTag(id: number) {
   form.tagIds = form.tagIds.includes(id)
     ? form.tagIds.filter(tagId => tagId !== id)
@@ -164,8 +176,8 @@ async function save() {
     toast.error('封面地址必须是 http(s) 链接')
     return
   }
-  if (!playerIconFile.value && form.playerIconUrl.trim() && !isHttpUrl(form.playerIconUrl.trim())) {
-    toast.error('进度图标地址必须是 http(s) 链接')
+  if (!playerIconFile.value && form.playerIconUrl.trim() && !isPlayerIconUrl(form.playerIconUrl.trim())) {
+    toast.error('进度图标地址必须是 http(s) 链接或内置图标')
     return
   }
 
@@ -364,7 +376,7 @@ useSeoMeta({
             </div>
             <div class="edit-image-copy">
               <strong>播放进度图标</strong>
-              <p>可选。建议透明背景的正方形 PNG / WebP，显示在进度条拖动位置。</p>
+              <p>仅管理员可设置。可选择内置图标，或上传透明背景的正方形 PNG / WebP。</p>
               <div class="edit-image-actions">
                 <button class="btn btn-subtle btn-sm" type="button" @click="playerIconInput?.click()">
                   <AppIcon name="upload" :size="13" />
@@ -375,9 +387,22 @@ useSeoMeta({
               </div>
             </div>
           </div>
+          <div class="edit-icon-presets">
+            <button
+              v-for="preset in PLAYER_ICON_PRESETS"
+              :key="preset.key"
+              type="button"
+              class="edit-icon-preset"
+              :class="{ 'is-active': form.playerIconUrl === preset.url && !playerIconFile }"
+              @click="selectPlayerIconPreset(preset.url)"
+            >
+              <img :src="preset.url" :alt="preset.label">
+              <span>{{ preset.label }}</span>
+            </button>
+          </div>
           <div class="field">
-            <label class="field-label" for="edit-video-player-icon">进度图标地址 <span class="field-label__hint">上传图标后忽略</span></label>
-            <input id="edit-video-player-icon" v-model="form.playerIconUrl" class="input" type="url" placeholder="https://example.com/progress-icon.png">
+            <label class="field-label" for="edit-video-player-icon">自定义图标地址 <span class="field-label__hint">上传图标或选择预设后忽略</span></label>
+            <input id="edit-video-player-icon" v-model="form.playerIconUrl" class="input" type="text" inputmode="url" placeholder="https://example.com/progress-icon.png">
           </div>
         </section>
       </div>
@@ -566,6 +591,39 @@ useSeoMeta({
   font-size: 9.5px;
   line-height: 1.7;
 }
+.edit-icon-presets {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+.edit-icon-preset {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 5px;
+  padding: 8px 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 8px;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, transform 180ms var(--ease-out);
+}
+.edit-icon-preset img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.edit-icon-preset:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+.edit-icon-preset.is-active {
+  border-color: rgba(169, 103, 22, 0.45);
+  color: var(--amber-bright);
+  background: rgba(169, 103, 22, 0.08);
+}
 .edit-image-actions {
   display: flex;
   flex-wrap: wrap;
@@ -691,6 +749,9 @@ useSeoMeta({
   .edit-form-grid,
   .edit-side {
     grid-template-columns: 1fr;
+  }
+  .edit-icon-presets {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .edit-image-row {
     align-items: flex-start;
