@@ -70,7 +70,7 @@ const progressIconError = ref(false)
 const isMobile = ref(false)
 
 let hideTimer: ReturnType<typeof setTimeout> | null = null
-let clock: ReturnType<typeof setInterval> | null = null
+let frame: number | null = null
 let mobileQuery: MediaQueryList | null = null
 
 const user = auth.user
@@ -91,6 +91,8 @@ const showCenterPlay = computed(() => Boolean(props.src) && started.value && !pl
 const rateLabel = computed(() => `${Number(prefs.rate.toFixed(2))}x`)
 const volumeIcon = computed(() => prefs.muted || prefs.volume === 0 ? 'mute' : 'volume')
 const hasProgressIcon = computed(() => Boolean(props.progressIcon) && !progressIconError.value)
+// Danmaku only needs ~10 decisions per second; the progress bar itself updates every frame.
+const danmakuClock = computed(() => Math.round(currentTime.value * 10) / 10)
 const skinVars = computed<Record<string, string>>(() => {
   const palette = {
     amber: { accent: '#f3b85f', ink: '#171208', rgb: '243, 184, 95' },
@@ -150,18 +152,27 @@ function applyPreferences() {
 
 function startClock() {
   stopClock()
-  clock = setInterval(() => {
-    if (!videoEl.value || videoEl.value.paused) return
-    currentTime.value = videoEl.value.currentTime
-    if (videoEl.value.buffered.length) {
-      buffered.value = videoEl.value.buffered.end(videoEl.value.buffered.length - 1)
+  const tick = () => {
+    const element = videoEl.value
+    if (!element) {
+      frame = null
+      return
     }
-  }, 100)
+    if (!element.paused) {
+      // Direct rAF sampling keeps the timeline and its moving thumb smooth.
+      currentTime.value = element.currentTime
+      if (element.buffered.length) {
+        buffered.value = element.buffered.end(element.buffered.length - 1)
+      }
+    }
+    frame = requestAnimationFrame(tick)
+  }
+  frame = requestAnimationFrame(tick)
 }
 
 function stopClock() {
-  if (clock) clearInterval(clock)
-  clock = null
+  if (frame !== null) cancelAnimationFrame(frame)
+  frame = null
 }
 
 async function play() {
@@ -209,6 +220,7 @@ function onPlay() {
 function onPause() {
   playing.value = false
   stopClock()
+  if (videoEl.value) currentTime.value = videoEl.value.currentTime
   emit('pause')
   showControls(false)
 }
@@ -217,6 +229,7 @@ function onEnded() {
   playing.value = false
   ended.value = true
   stopClock()
+  if (videoEl.value) currentTime.value = videoEl.value.duration || currentTime.value
   emit('ended')
   showControls(false)
 }
@@ -671,7 +684,7 @@ defineExpose({ play })
         v-if="prefs.danmakuEnabled"
         ref="danmakuLayerRef"
         :items="danmakuList"
-        :current-time="currentTime"
+        :current-time="danmakuClock"
         :playing="playing"
         :enabled="prefs.danmakuEnabled"
         :opacity="prefs.danmakuOpacity"
@@ -944,7 +957,7 @@ defineExpose({ play })
         >
           <div class="progress-rail">
             <span class="progress-buffered" :style="{ width: `${bufferedPercent}%` }" />
-            <span class="progress-played" :style="{ width: `${progressPercent}%` }" />
+            <span class="progress-played" :style="{ transform: `scaleX(${progressPercent / 100})` }" />
             <span
               class="progress-thumb"
               :class="{ 'has-icon': hasProgressIcon }"
@@ -1501,8 +1514,11 @@ defineExpose({ play })
   background: rgba(243, 239, 228, 0.2);
 }
 .progress-played {
+  width: 100%;
   background: var(--pa);
   box-shadow: 0 0 14px rgba(var(--pa-rgb), 0.24);
+  transform-origin: left center;
+  will-change: transform;
 }
 .progress-thumb {
   position: absolute;
