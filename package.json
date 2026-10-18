@@ -1,0 +1,25 @@
+{
+  "name": "video-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --port 5173",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck",
+    "seed:demo": "bun run scripts/seed-demo.ts",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^4.6.0",
+    "vue": "^3.5.43",
+    "vue-router": "^5.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.12"
+  }
+}
