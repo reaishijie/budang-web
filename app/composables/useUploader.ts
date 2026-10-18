@@ -74,5 +74,37 @@ export function useUploader() {
     })
   }
 
-  return { upload, videoDuration }
+  /**
+   * 从公开视频 URL 读取 metadata 时长。
+   * 跨域视频通常仍能读取 loadedmetadata；失败/超时则由用户手动填写。
+   */
+  function videoDurationFromUrl(url: string, timeoutMs = 8_000): Promise<number> {
+    return new Promise((resolve) => {
+      if (!/^https?:\/\//i.test(url)) {
+        resolve(0)
+        return
+      }
+      const video = document.createElement('video')
+      let settled = false
+      const finish = (duration: number) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        video.removeAttribute('src')
+        video.load()
+        resolve(duration)
+      }
+      const timer = setTimeout(() => finish(0), timeoutMs)
+      video.preload = 'metadata'
+      video.muted = true
+      video.onloadedmetadata = () => {
+        const duration = Number.isFinite(video.duration) ? Math.round(video.duration) : 0
+        finish(duration > 0 ? duration : 0)
+      }
+      video.onerror = () => finish(0)
+      video.src = url
+    })
+  }
+
+  return { upload, videoDuration, videoDurationFromUrl }
 }

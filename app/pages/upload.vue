@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useUploader } from '~/composables/useUploader'
 import { useToast } from '~/composables/useToast'
 import { formatBytes, formatDuration } from '~/utils/format'
@@ -43,12 +43,16 @@ const coverPreview = ref('')
 const playerIconPreview = ref('')
 const dragActive = ref(false)
 const submitting = ref(false)
+const probingDuration = ref(false)
+const durationEditing = ref(false)
 const uploadPercent = ref(0)
 const errorMessage = ref('')
 const selectedTags = ref<number[]>([])
 const videoInput = ref<HTMLInputElement | null>(null)
 const coverInput = ref<HTMLInputElement | null>(null)
 const playerIconInput = ref<HTMLInputElement | null>(null)
+let durationProbeTimer: ReturnType<typeof setTimeout> | null = null
+let durationProbeToken = 0
 
 const form = reactive({
   title: '',
@@ -197,9 +201,31 @@ function selectPlayerIconPreset(url: string) {
   form.playerIconUrl = url
 }
 
+async function probeExternalDuration(url = form.videoUrl.trim()) {
+  if (mode.value !== 'external' || !isHttpUrl(url)) return
+  const token = ++durationProbeToken
+  probingDuration.value = true
+  const duration = await uploader.videoDurationFromUrl(url)
+  if (token !== durationProbeToken) return
+  probingDuration.value = false
+  if (duration > 0 && form.duration <= 0) form.duration = duration
+}
+
+watch(() => form.videoUrl, (value) => {
+  if (durationProbeTimer) clearTimeout(durationProbeTimer)
+  if (mode.value !== 'external' || !isHttpUrl(value.trim())) return
+  durationProbeTimer = setTimeout(() => {
+    void probeExternalDuration(value.trim())
+  }, 650)
+})
+
 function switchMode(next: 'upload' | 'external') {
   mode.value = next
   errorMessage.value = ''
+  durationEditing.value = false
+  if (next === 'external' && form.duration <= 0) {
+    void probeExternalDuration()
+  }
 }
 
 async function submit() {
@@ -293,6 +319,8 @@ async function submit() {
 }
 
 onBeforeUnmount(() => {
+  if (durationProbeTimer) clearTimeout(durationProbeTimer)
+  durationProbeToken += 1
   revokeVideoPreview()
   revokeCoverPreview()
   revokePlayerIconPreview()
@@ -499,9 +527,32 @@ useSeoMeta({
                   <option v-for="category in categories" :key="category.id" :value="String(category.id)">{{ category.name }}</option>
                 </select>
               </div>
-              <div class="field">
-                <label class="field-label" for="video-duration">时长（秒）</label>
-                <input id="video-duration" v-model.number="form.duration" class="input" type="number" min="0" max="86400" step="1">
+              <div class="field duration-field">
+                <span class="field-label">影片时长</span>
+                <div class="duration-auto">
+                  <strong>{{ form.duration > 0 ? formatDuration(form.duration) : probingDuration ? '正在读取…' : '待读取' }}</strong>
+                  <span v-if="mode === 'upload'">从本地视频自动读取，无需填写秒数</span>
+                  <span v-else-if="probingDuration">正在从视频地址读取元数据</span>
+                  <span v-else>自动读取；失败时可手动修正</span>
+                  <button
+                    v-if="mode === 'external' && !durationEditing"
+                    type="button"
+                    class="duration-edit"
+                    @click="durationEditing = true"
+                  >
+                    手动修正
+                  </button>
+                </div>
+                <input
+                  v-if="mode === 'external' && (durationEditing || (form.duration <= 0 && !probingDuration))"
+                  v-model.number="form.duration"
+                  class="input duration-input"
+                  type="number"
+                  min="0"
+                  max="86400"
+                  step="1"
+                  placeholder="自动读取失败时，手动填写秒数"
+                >
               </div>
             </div>
 
@@ -860,6 +911,44 @@ useSeoMeta({
   font-size: 9px;
 }
 
+.duration-auto {
+  display: flex;
+  min-height: 42px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.duration-auto strong {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+}
+.duration-auto span {
+  color: var(--muted);
+  font-size: 9.5px;
+}
+.duration-input {
+  margin-top: 7px;
+}
+.duration-edit {
+  margin-left: auto;
+  padding: 3px 0;
+  border: 0;
+  color: var(--amber-bright);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  cursor: pointer;
+}
+.duration-edit:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .form-row {
   display: grid;
   grid-template-columns: 1fr 0.6fr;
