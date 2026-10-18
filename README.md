@@ -1,4 +1,6 @@
-# 光影 Web · Video Frontend
+# 补档 · Video Web
+
+<img src="docs/screenshots/logo.png" alt="补档" width="240">
 
 基于 **Nuxt 4 + Vue 3** 的视频站前端，对接主仓库根目录（`..`）的视频站后端。架构参考 `navigation-web` 的 **Nuxt BFF + HttpOnly Cookie** 方案，但 UI 为独立设计的暗色电影放映室风格：暖琥珀光、编辑感衬线字、胶片颗粒与编号片单。
 

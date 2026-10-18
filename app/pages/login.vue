@@ -12,7 +12,7 @@ const showPassword = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
 
-useSeoMeta({ title: '登录', description: '登录光影，继续未完的放映。' })
+useSeoMeta({ title: '登录', description: '登录补档，继续未完的放映。' })
 
 const redirectPath = computed(() => {
   const value = route.query.redirect
@@ -30,7 +30,7 @@ async function submit() {
   submitting.value = true
   try {
     await auth.login(username.value.trim(), password.value)
-    toast.success('欢迎回到光影')
+    toast.success('欢迎回到补档')
     await router.push(redirectPath.value)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '登录失败，请稍后重试'
@@ -75,7 +75,7 @@ async function submit() {
       </div>
 
       <div class="showcase-foot">
-        <span>GUANGYING SCREENING ROOM</span>
+        <span>BUDANG ARCHIVE</span>
         <span>EST. 2026</span>
       </div>
     </section>
@@ -160,7 +160,7 @@ async function submit() {
       </div>
 
       <div class="auth-below">
-        <span>© {{ new Date().getFullYear() }} 光影放映室</span>
+        <span>© {{ new Date().getFullYear() }} 补档放映室</span>
         <span>BUN · HONO · NUXT</span>
       </div>
     </section>

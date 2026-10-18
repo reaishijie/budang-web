@@ -133,7 +133,7 @@ async function submitReject() {
   }
 }
 
-useSeoMeta({ title: '影片审核', description: '审核、发布、下架光影影片。' })
+useSeoMeta({ title: '影片审核', description: '审核、发布、下架补档影片。' })
 </script>
 
 <template>

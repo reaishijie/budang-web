@@ -71,7 +71,7 @@ const stats = computed(() => [
   },
 ])
 
-useSeoMeta({ title: '管理概览', description: '光影放映控制室概览。' })
+useSeoMeta({ title: '管理概览', description: '补档放映控制室概览。' })
 </script>
 
 <template>
@@ -80,7 +80,7 @@ useSeoMeta({ title: '管理概览', description: '光影放映控制室概览。
       <div>
         <span class="eyebrow">CONTROL ROOM · 放映控制室</span>
         <h1>今晚的银幕</h1>
-        <p>你好，{{ user?.nickname || user?.username }}。这里是光影的放映控制室。</p>
+        <p>你好，{{ user?.nickname || user?.username }}。这里是补档的放映控制室。</p>
       </div>
       <div class="admin-head-actions">
         <button class="btn btn-ghost btn-sm" type="button" @click="refresh()">

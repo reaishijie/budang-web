@@ -138,7 +138,7 @@ async function removeTag(tag: TagItem) {
   }
 }
 
-useSeoMeta({ title: '分类与标签', description: '管理光影的放映分类与影片标签。' })
+useSeoMeta({ title: '分类与标签', description: '管理补档的放映分类与影片标签。' })
 </script>
 
 <template>

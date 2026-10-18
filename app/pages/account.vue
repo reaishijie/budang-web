@@ -134,7 +134,7 @@ const transactionLabel: Record<string, string> = {
 
 useSeoMeta({
   title: '个人中心',
-  description: '管理你的光影账户、能量与上传权限。',
+  description: '管理你的补档账户、能量与上传权限。',
 })
 </script>
 
@@ -226,7 +226,7 @@ useSeoMeta({
               </span>
             </div>
             <h2>上传权限</h2>
-            <p v-if="canUpload">你可以向光影提交影片。用户提交默认进入审核队列，管理员审核后公开放映。</p>
+            <p v-if="canUpload">你可以向补档提交影片。用户提交默认进入审核队列，管理员审核后公开放映。</p>
             <p v-else>上传权限由管理员按账户开通。你可以先收藏、评论并积累自己的放映记录。</p>
             <NuxtLink v-if="canUpload" class="btn btn-primary btn-sm" to="/upload">
               <AppIcon name="circlePlus" :size="14" />

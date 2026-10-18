@@ -153,7 +153,7 @@ const visibleLabels: Record<ConfigVisibility, string> = {
   ADMIN: '仅管理员',
 }
 
-useSeoMeta({ title: '站点配置', description: '管理光影站点、存储、上传与能量配置。' })
+useSeoMeta({ title: '站点配置', description: '管理补档站点、存储、上传与能量配置。' })
 </script>
 
 <template>

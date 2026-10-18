@@ -17,7 +17,7 @@ const showPassword = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
 
-useSeoMeta({ title: '注册', description: '创建光影账户，收藏影片并参与讨论。' })
+useSeoMeta({ title: '注册', description: '创建补档账户，收藏影片并参与讨论。' })
 
 const redirectPath = computed(() => {
   const value = route.query.redirect
@@ -54,7 +54,7 @@ async function submit() {
       email: form.email.trim() || undefined,
     })
     await auth.login(form.username.trim(), form.password)
-    toast.success('入场券已生效，欢迎来到光影')
+    toast.success('入场券已生效，欢迎来到补档')
     await router.push(redirectPath.value)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '注册失败，请稍后重试'
@@ -92,8 +92,8 @@ async function submit() {
           <span>NO. 2026</span>
         </div>
         <div class="ticket-body">
-          <strong>光影放映室</strong>
-          <span>GUANGYING SCREENING ROOM</span>
+          <strong>补档放映室</strong>
+          <span>BUDANG ARCHIVE</span>
         </div>
         <div class="ticket-dash" />
         <div class="ticket-foot">
@@ -103,7 +103,7 @@ async function submit() {
       </div>
 
       <div class="showcase-foot">
-        <span>GUANGYING SCREENING ROOM</span>
+        <span>BUDANG ARCHIVE</span>
         <span>EST. 2026</span>
       </div>
     </section>
@@ -225,7 +225,7 @@ async function submit() {
       </div>
 
       <div class="auth-below">
-        <span>© {{ new Date().getFullYear() }} 光影放映室</span>
+        <span>© {{ new Date().getFullYear() }} 补档放映室</span>
         <span>NO ALGORITHM · JUST GOOD FILMS</span>
       </div>
     </section>

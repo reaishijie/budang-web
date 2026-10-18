@@ -194,7 +194,7 @@ const statusTone: Record<UserStatus, string> = {
   DISABLED: 'muted',
 }
 
-useSeoMeta({ title: '用户与权限', description: '管理光影用户、角色、状态与上传权限。' })
+useSeoMeta({ title: '用户与权限', description: '管理补档用户、角色、状态与上传权限。' })
 </script>
 
 <template>

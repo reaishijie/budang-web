@@ -27,7 +27,7 @@ const total = computed(() => data.value?.total ?? 0)
 
 useSeoMeta({
   title: () => `${profile.value.nickname || profile.value.username} 的放映页`,
-  description: () => `${profile.value.nickname || profile.value.username} 在光影发布的影片。`,
+  description: () => `${profile.value.nickname || profile.value.username} 在补档发布的影片。`,
 })
 </script>
 

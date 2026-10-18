@@ -16,7 +16,8 @@ export interface PlayerPreferences {
   skin: PlayerSkin
 }
 
-const STORAGE_KEY = 'guangying-player-preferences'
+const STORAGE_KEY = 'budang-player-preferences'
+const LEGACY_STORAGE_KEY = 'guangying-player-preferences'
 
 const defaults: PlayerPreferences = {
   volume: 0.8,
@@ -47,8 +48,9 @@ export function usePlayerPreferences() {
   function load() {
     if (!import.meta.client) return
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
+      const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY)
       if (!raw) return
+      if (!localStorage.getItem(STORAGE_KEY)) localStorage.setItem(STORAGE_KEY, raw)
       const saved = JSON.parse(raw) as Partial<PlayerPreferences>
       prefs.volume = clampNumber(saved.volume, 0, 1, defaults.volume)
       prefs.muted = typeof saved.muted === 'boolean' ? saved.muted : defaults.muted

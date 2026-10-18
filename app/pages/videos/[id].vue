@@ -256,7 +256,7 @@ onBeforeUnmount(() => {
               </span>
               <span class="watch-rec-copy">
                 <strong>{{ item.title }}</strong>
-                <span>{{ item.uploader?.nickname || item.uploader?.username || '光影放映室' }}</span>
+                <span>{{ item.uploader?.nickname || item.uploader?.username || '补档放映室' }}</span>
                 <em>{{ formatCount(item.counts.views) }} 次观看</em>
               </span>
             </NuxtLink>

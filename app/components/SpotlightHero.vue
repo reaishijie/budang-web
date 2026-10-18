@@ -61,7 +61,7 @@ const fallbackHue = computed(() => {
           />
           <span>
             <small>放映者</small>
-            <strong>{{ video.uploader?.nickname || video.uploader?.username || '光影放映室' }}</strong>
+            <strong>{{ video.uploader?.nickname || video.uploader?.username || '补档放映室' }}</strong>
           </span>
         </div>
         <div class="hero-stats">

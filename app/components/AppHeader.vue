@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
 
         <template v-else>
           <NuxtLink class="login-link" to="/login">登录</NuxtLink>
-          <NuxtLink class="btn btn-primary btn-sm join-link" to="/register">加入光影</NuxtLink>
+          <NuxtLink class="btn btn-primary btn-sm join-link" to="/register">加入补档</NuxtLink>
         </template>
 
         <button

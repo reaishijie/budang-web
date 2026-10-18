@@ -326,7 +326,7 @@ onBeforeUnmount(() => {
 
 useSeoMeta({
   title: '提交影片',
-  description: '向光影提交你的影片，等待审核后公开放映。',
+  description: '向补档提交你的影片，等待审核后公开放映。',
 })
 </script>
 

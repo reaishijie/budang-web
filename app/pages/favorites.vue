@@ -38,7 +38,7 @@ async function remove(item: FavoriteItem) {
 
 useSeoMeta({
   title: '我的收藏',
-  description: '你在光影收藏的影片。',
+  description: '你在补档收藏的影片。',
 })
 </script>
 

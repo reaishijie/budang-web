@@ -45,7 +45,7 @@ const statusTone = computed(() => videoStatusTone(props.video.status))
         :style="{ '--fallback-hue': fallbackHue }"
       >
         <span class="fallback-word">{{ [...video.title][0] || '光' }}</span>
-        <span class="fallback-caption">GUANGYING ARCHIVE</span>
+        <span class="fallback-caption">BUDANG ARCHIVE</span>
       </div>
 
       <div class="poster-shade" aria-hidden="true" />

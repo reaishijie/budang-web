@@ -50,7 +50,7 @@ export function useApi() {
     const message = typeof body?.message === 'string'
       ? body.message
       : status === 0
-        ? '暂时无法连接光影服务，请稍后重试。'
+        ? '暂时无法连接补档服务，请稍后重试。'
         : failure.message || '请求失败，请稍后重试。'
 
     return new ApiRequestError(message, status, body?.errorCode)

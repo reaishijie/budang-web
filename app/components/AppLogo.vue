@@ -12,17 +12,20 @@ const siteSettings = useSiteSettings()
   <span class="brand" :class="{ 'brand--compact': compact }">
     <span class="brand-mark" aria-hidden="true">
       <svg viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="16.5" stroke="currentColor" stroke-opacity=".34" />
-        <circle cx="20" cy="20" r="11.2" stroke="currentColor" stroke-opacity=".5" />
-        <path d="M20 3.5v8M20 28.5v8M3.5 20h8M28.5 20h8" stroke="currentColor" stroke-opacity=".55" stroke-linecap="round" />
-        <path d="M9.2 9.2 15 15M25 25l5.8 5.8M30.8 9.2 25 15M15 25l-5.8 5.8" stroke="currentColor" stroke-opacity=".28" stroke-linecap="round" />
-        <circle cx="20" cy="20" r="4.4" fill="var(--amber)" />
-        <circle cx="20" cy="20" r="7.4" stroke="var(--amber)" stroke-opacity=".32" />
+        <rect x="3.5" y="3.5" width="23" height="23" rx="6.2" stroke="currentColor" stroke-opacity=".5" />
+        <g fill="currentColor" opacity=".38">
+          <rect x="8" y="9" width="3.2" height="2.4" rx="1.1" />
+          <rect x="8" y="14.2" width="3.2" height="2.4" rx="1.1" />
+          <rect x="8" y="19.4" width="3.2" height="2.4" rx="1.1" />
+        </g>
+        <rect x="15" y="14.5" width="21" height="21" rx="6" fill="var(--amber)" />
+        <path d="M23 20.8 31.8 25 23 29.2Z" fill="#171208" />
+        <path d="M30.8 3.8h4.4v4.4" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".8" />
       </svg>
     </span>
     <span v-if="!compact" class="brand-word">
       <strong>{{ siteSettings.name }}</strong>
-      <small>SCREENING ROOM</small>
+      <small>BUDANG ARCHIVE</small>
     </span>
   </span>
 </template>
@@ -48,7 +51,7 @@ const siteSettings = useSiteSettings()
 }
 
 .brand:hover .brand-mark {
-  transform: rotate(45deg);
+  transform: rotate(7deg) scale(1.04);
 }
 
 .brand-mark svg {

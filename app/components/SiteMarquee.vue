@@ -6,7 +6,7 @@
         <em>独立影像放映室</em><i>✦</i>
         <em>NO ALGORITHM</em><i>✦</i>
         <em>JUST GOOD FILMS</em><i>✦</i>
-        <em>光影放映中</em><i>✦</i>
+        <em>补档放映中</em><i>✦</i>
       </span>
     </div>
   </div>

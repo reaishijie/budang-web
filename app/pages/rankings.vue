@@ -121,8 +121,8 @@ function barWidth(video: Video) {
 
 useSeoMeta({
   title: '热度榜',
-  description: '光影热播榜、口碑榜与讨论榜：用观看、喜欢和讨论，看看此刻大家都在看什么。',
-  ogTitle: '光影热度榜',
+  description: '补档热播榜、口碑榜与讨论榜：用观看、喜欢和讨论，看看此刻大家都在看什么。',
+  ogTitle: '补档热度榜',
   ogDescription: '实时热播、口碑与讨论榜单。',
 })
 </script>
@@ -217,7 +217,7 @@ useSeoMeta({
                 <span>{{ formatDuration(item.video.duration) }}</span>
               </div>
               <h2>{{ item.video.title }}</h2>
-              <p>{{ item.video.uploader?.nickname || item.video.uploader?.username || '光影放映室' }}</p>
+              <p>{{ item.video.uploader?.nickname || item.video.uploader?.username || '补档放映室' }}</p>
             </div>
           </NuxtLink>
         </section>
@@ -247,7 +247,7 @@ useSeoMeta({
                     <span class="chart-meta">
                       {{ video.category?.name || '未分类' }}
                       <i />
-                      {{ video.uploader?.nickname || video.uploader?.username || '光影放映室' }}
+                      {{ video.uploader?.nickname || video.uploader?.username || '补档放映室' }}
                     </span>
                     <span class="chart-bar">
                       <i :style="{ width: barWidth(video) }" />

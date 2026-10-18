@@ -13,7 +13,7 @@ const year = new Date().getFullYear()
           <br>
           保留一块安静的银幕。
         </p>
-        <span class="footer-mark">EST. 2026 · GUANGYING SCREENING ROOM</span>
+        <span class="footer-mark">EST. 2026 · BUDANG ARCHIVE</span>
       </div>
 
       <div class="footer-col">
@@ -34,7 +34,7 @@ const year = new Date().getFullYear()
 
       <div class="footer-col footer-note">
         <h3>放映须知</h3>
-        <p>光影是一个学习型视频站项目。影片由获得上传权限的创作者提交，经审核后公开放映。</p>
+        <p>补档是一个学习型视频站项目。影片由获得上传权限的创作者提交，经审核后公开放映。</p>
         <p class="footer-tech">Bun · Hono · Prisma · Nuxt</p>
       </div>
     </div>

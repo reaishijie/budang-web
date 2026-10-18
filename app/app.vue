@@ -37,8 +37,11 @@ const iconHref = computed(() => {
 })
 
 useHead(() => ({
-  titleTemplate: (title?: string) => title ? `${title} · ${siteSettings.value.name}` : '光影放映室',
-  link: [{ rel: 'icon', href: iconHref.value }],
+  titleTemplate: (title?: string) => title ? `${title} · ${siteSettings.value.name}` : '补档放映室',
+  link: [
+    { rel: 'icon', href: iconHref.value },
+    { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+  ],
   meta: [
     { name: 'description', content: siteSettings.value.description },
     { name: 'keywords', content: siteSettings.value.keywords },

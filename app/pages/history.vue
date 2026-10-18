@@ -56,7 +56,7 @@ async function clearAll() {
 
 useSeoMeta({
   title: '观看历史',
-  description: '你最近在光影看过的影片。',
+  description: '你最近在补档看过的影片。',
 })
 </script>
 
@@ -125,7 +125,7 @@ useSeoMeta({
         v-else
         icon="clock"
         title="还没有留下观看痕迹"
-        text="当你在光影开始播放一支影片，这里会记住你停下的位置。"
+        text="当你在补档开始播放一支影片，这里会记住你停下的位置。"
       >
         <NuxtLink class="btn btn-primary btn-sm" to="/videos">去片库看看</NuxtLink>
       </EmptyState>

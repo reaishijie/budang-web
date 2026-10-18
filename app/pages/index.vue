@@ -218,7 +218,7 @@ useSeoMeta({
         <div class="upload-banner-copy">
           <span class="section-kicker">FOR FILMMAKERS</span>
           <h2 class="upload-banner-title">如果你也拍下了什么，<br>把它放进光里。</h2>
-          <p>获得上传权限的创作者可以提交影片，经审核后在光影公开放映。</p>
+          <p>获得上传权限的创作者可以提交影片，经审核后在补档公开放映。</p>
         </div>
         <div class="upload-banner-actions">
           <NuxtLink v-if="auth.canUpload.value" class="btn btn-primary" to="/upload">

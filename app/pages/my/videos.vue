@@ -224,7 +224,7 @@ useSeoMeta({
         v-else
         icon="film"
         :title="status ? '这个状态下还没有影片' : '你的创作者桌面还是空的'"
-        :text="status ? '切换到其他状态，或提交一支新影片。' : (auth.canUpload.value ? '上传第一支影片，让它进入光影的片库。' : '当前账户没有上传权限，可以先联系管理员开通。')"
+        :text="status ? '切换到其他状态，或提交一支新影片。' : (auth.canUpload.value ? '上传第一支影片，让它进入补档的片库。' : '当前账户没有上传权限，可以先联系管理员开通。')"
       >
         <NuxtLink v-if="auth.canUpload.value" class="btn btn-primary btn-sm" to="/upload">提交影片</NuxtLink>
         <NuxtLink class="btn btn-ghost btn-sm" to="/videos">浏览片库</NuxtLink>
