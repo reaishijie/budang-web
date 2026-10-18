@@ -2,7 +2,6 @@ import { reactive, watch } from 'vue'
 import type { DanmakuMode } from '~/types'
 
 export type PlayerSkin = 'amber' | 'ivory' | 'neon' | 'crimson'
-export type PlayGlyph = 'triangle' | 'aperture' | 'spark' | 'ring'
 
 export interface PlayerPreferences {
   volume: number
@@ -15,7 +14,6 @@ export interface PlayerPreferences {
   danmakuColor: string
   danmakuMode: DanmakuMode
   skin: PlayerSkin
-  glyph: PlayGlyph
 }
 
 const STORAGE_KEY = 'guangying-player-preferences'
@@ -31,11 +29,9 @@ const defaults: PlayerPreferences = {
   danmakuColor: '#f3efe4',
   danmakuMode: 'SCROLL',
   skin: 'amber',
-  glyph: 'triangle',
 }
 
 const skins: PlayerSkin[] = ['amber', 'ivory', 'neon', 'crimson']
-const glyphs: PlayGlyph[] = ['triangle', 'aperture', 'spark', 'ring']
 const modes: DanmakuMode[] = ['SCROLL', 'TOP', 'BOTTOM']
 const hexColor = /^#[0-9a-fA-F]{6}$/
 
@@ -74,7 +70,6 @@ export function usePlayerPreferences() {
         ? saved.danmakuMode as DanmakuMode
         : defaults.danmakuMode
       prefs.skin = skins.includes(saved.skin as PlayerSkin) ? saved.skin as PlayerSkin : defaults.skin
-      prefs.glyph = glyphs.includes(saved.glyph as PlayGlyph) ? saved.glyph as PlayGlyph : defaults.glyph
     } catch {
       // A corrupted local preference should never stop playback.
     }

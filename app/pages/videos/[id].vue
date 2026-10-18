@@ -53,7 +53,7 @@ const { data: related } = await useAsyncData(
 
 const relatedVideos = computed(() => (related.value?.items ?? [])
   .filter(item => item.id !== videoId.value)
-  .slice(0, 4))
+  .slice(0, 6))
 
 const busyVote = ref(false)
 const busyFavorite = ref(false)
@@ -213,26 +213,59 @@ onBeforeUnmount(() => {
         <span v-else>影片</span>
       </nav>
 
-      <VideoPlayer
-        :video-id="video.id"
-        :src="video.playbackUrl"
-        :poster="video.coverUrl"
-        :title="video.title"
-        @play="onPlay"
-        @timeupdate="onTimeUpdate"
-        @pause="onPause"
-        @ended="onEnded"
-      />
+      <div class="watch-layout" :class="{ 'has-side': relatedVideos.length }">
+        <div class="watch-main">
+          <VideoPlayer
+            :video-id="video.id"
+            :src="video.playbackUrl"
+            :poster="video.coverUrl"
+            :progress-icon="video.playerIconUrl"
+            :title="video.title"
+            @play="onPlay"
+            @timeupdate="onTimeUpdate"
+            @pause="onPause"
+            @ended="onEnded"
+          />
 
-      <div v-if="canSeeModeration && video.status !== 'PUBLISHED'" class="status-banner" :class="`status-banner--${statusTone}`">
-        <AppIcon :name="video.status === 'PENDING' ? 'clock' : 'alert'" :size="16" />
-        <div>
-          <strong>{{ VIDEO_STATUS_LABEL[video.status] || video.status }}</strong>
-          <span v-if="video.rejectReason">{{ video.rejectReason }}</span>
-          <span v-else-if="video.status === 'PENDING'">影片正在等待管理员审核，目前只有你和管理员可见。</span>
-          <span v-else>当前状态不会出现在公开片库中。</span>
+          <div v-if="canSeeModeration && video.status !== 'PUBLISHED'" class="status-banner" :class="`status-banner--${statusTone}`">
+            <AppIcon :name="video.status === 'PENDING' ? 'clock' : 'alert'" :size="16" />
+            <div>
+              <strong>{{ VIDEO_STATUS_LABEL[video.status] || video.status }}</strong>
+              <span v-if="video.rejectReason">{{ video.rejectReason }}</span>
+              <span v-else-if="video.status === 'PENDING'">影片正在等待管理员审核，目前只有你和管理员可见。</span>
+              <span v-else>当前状态不会出现在公开片库中。</span>
+            </div>
+            <NuxtLink class="btn btn-subtle btn-sm" to="/my/videos">管理影片</NuxtLink>
+          </div>
         </div>
-        <NuxtLink class="btn btn-subtle btn-sm" to="/my/videos">管理影片</NuxtLink>
+
+        <aside v-if="relatedVideos.length" class="watch-side panel">
+          <header class="watch-side-head">
+            <div>
+              <span class="side-label">UP NEXT</span>
+              <h2>推荐放映</h2>
+            </div>
+            <span>{{ String(relatedVideos.length).padStart(2, '0') }}</span>
+          </header>
+          <div class="watch-side-list">
+            <NuxtLink v-for="item in relatedVideos" :key="item.id" class="watch-rec" :to="`/videos/${item.id}`">
+              <span class="watch-rec-thumb">
+                <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" loading="lazy">
+                <span v-else class="watch-rec-fallback">{{ [...item.title][0] || '光' }}</span>
+                <small>{{ formatDuration(item.duration) }}</small>
+              </span>
+              <span class="watch-rec-copy">
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.uploader?.nickname || item.uploader?.username || '光影放映室' }}</span>
+                <em>{{ formatCount(item.counts.views) }} 次观看</em>
+              </span>
+            </NuxtLink>
+          </div>
+          <NuxtLink class="watch-side-more" to="/videos">
+            查看全部影片
+            <AppIcon name="arrowRight" :size="13" />
+          </NuxtLink>
+        </aside>
       </div>
 
       <div class="detail-grid">
@@ -372,12 +405,6 @@ onBeforeUnmount(() => {
         @count-change="updateCommentCount"
       />
 
-      <section v-if="relatedVideos.length" class="related-section">
-        <SectionHeading kicker="AFTER THIS FILM" title="接着看点什么" link-to="/videos" link-label="更多影片" />
-        <div class="related-grid">
-          <VideoCard v-for="item in relatedVideos" :key="item.id" :video="item" />
-        </div>
-      </section>
     </div>
   </div>
 </template>
@@ -439,6 +466,145 @@ onBeforeUnmount(() => {
 .status-banner span {
   color: var(--muted);
   font-size: 10.5px;
+}
+
+.watch-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.watch-layout.has-side {
+  grid-template-columns: minmax(0, 1fr) 306px;
+}
+.watch-main {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+.watch-side {
+  display: grid;
+  gap: 0;
+  padding: 17px;
+}
+.watch-side-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--line);
+}
+.watch-side-head > div {
+  display: grid;
+  gap: 5px;
+}
+.watch-side-head h2 {
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+.watch-side-head > span {
+  color: var(--amber-bright);
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+.watch-side-list {
+  display: grid;
+}
+.watch-rec {
+  display: grid;
+  grid-template-columns: 94px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  transition: transform 180ms var(--ease-out);
+}
+.watch-rec:hover {
+  transform: translateX(3px);
+}
+.watch-rec-thumb {
+  position: relative;
+  display: grid;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  background: var(--surface-2);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+.watch-rec-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 500ms var(--ease-out);
+}
+.watch-rec:hover .watch-rec-thumb img {
+  transform: scale(1.05);
+}
+.watch-rec-thumb small {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #f3efe4;
+  background: rgba(5, 6, 9, 0.75);
+  font-family: var(--font-mono);
+  font-size: 7px;
+}
+.watch-rec-fallback {
+  color: var(--muted);
+}
+.watch-rec-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+.watch-rec-copy strong {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.watch-rec:hover .watch-rec-copy strong {
+  color: var(--ink);
+}
+.watch-rec-copy span,
+.watch-rec-copy em {
+  overflow: hidden;
+  color: var(--muted-weak);
+  font-size: 8.5px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.watch-rec-copy em {
+  color: var(--muted);
+}
+.watch-side-more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 13px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  transition: color 160ms ease;
+}
+.watch-side-more:hover {
+  color: var(--amber-bright);
 }
 
 .detail-grid {
@@ -703,26 +869,23 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
 }
 
-.related-section {
-  margin-top: clamp(62px, 8vw, 98px);
-}
-.related-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(18px, 2.2vw, 28px);
-}
-
 @media (max-width: 1080px) {
+  .watch-layout.has-side {
+    grid-template-columns: minmax(0, 1fr) 274px;
+  }
   .detail-grid {
     grid-template-columns: minmax(0, 1fr) 270px;
     gap: 32px;
   }
-  .related-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 820px) {
+  .watch-layout.has-side {
+    grid-template-columns: 1fr;
+  }
+  .watch-side {
+    order: 2;
+  }
   .detail-grid {
     grid-template-columns: 1fr;
   }
@@ -743,9 +906,6 @@ onBeforeUnmount(() => {
     margin-left: 0;
   }
   .detail-side {
-    grid-template-columns: 1fr;
-  }
-  .related-grid {
     grid-template-columns: 1fr;
   }
   .status-banner {

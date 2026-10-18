@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { Danmaku, DanmakuMode } from '~/types'
-import { usePlayerPreferences, type PlayGlyph, type PlayerSkin } from '~/composables/usePlayerPreferences'
+import { usePlayerPreferences, type PlayerSkin } from '~/composables/usePlayerPreferences'
 
 const props = withDefaults(defineProps<{
   videoId: number
   src: string | null
   poster?: string | null
+  progressIcon?: string | null
   title: string
   autoplay?: boolean
 }>(), {
   poster: null,
+  progressIcon: null,
   autoplay: false,
 })
 
@@ -64,6 +66,7 @@ const sending = ref(false)
 const danmakuList = ref<Danmaku[]>([])
 const danmakuLoading = ref(false)
 const danmakuError = ref(false)
+const progressIconError = ref(false)
 const isMobile = ref(false)
 
 let hideTimer: ReturnType<typeof setTimeout> | null = null
@@ -72,7 +75,6 @@ let mobileQuery: MediaQueryList | null = null
 
 const user = auth.user
 const canSendDanmaku = computed(() => Boolean(user.value))
-const danmakuCount = computed(() => danmakuList.value.length)
 const progressPercent = computed(() => duration.value > 0
   ? Math.min(100, Math.max(0, (currentTime.value / duration.value) * 100))
   : 0)
@@ -88,12 +90,7 @@ const showPoster = computed(() => Boolean(props.src) && !started.value && !faile
 const showCenterPlay = computed(() => Boolean(props.src) && started.value && !playing.value && !failed.value)
 const rateLabel = computed(() => `${Number(prefs.rate.toFixed(2))}x`)
 const volumeIcon = computed(() => prefs.muted || prefs.volume === 0 ? 'mute' : 'volume')
-const glyphName = computed(() => ({
-  triangle: 'glyphTriangle',
-  aperture: 'glyphAperture',
-  spark: 'glyphSpark',
-  ring: 'glyphRing',
-}[prefs.glyph]))
+const hasProgressIcon = computed(() => Boolean(props.progressIcon) && !progressIconError.value)
 const skinVars = computed<Record<string, string>>(() => {
   const palette = {
     amber: { accent: '#f3b85f', ink: '#171208', rgb: '243, 184, 95' },
@@ -124,12 +121,6 @@ const skins: Array<{ key: PlayerSkin; label: string; color: string }> = [
   { key: 'ivory', label: '月白', color: '#f3efe4' },
   { key: 'neon', label: '霓虹', color: '#7ef0c0' },
   { key: 'crimson', label: '胶片红', color: '#ff9a8f' },
-]
-const glyphs: Array<{ key: PlayGlyph; label: string; icon: string }> = [
-  { key: 'triangle', label: '银幕三角', icon: 'glyphTriangle' },
-  { key: 'aperture', label: '镜头光圈', icon: 'glyphAperture' },
-  { key: 'spark', label: '光斑', icon: 'glyphSpark' },
-  { key: 'ring', label: '环形', icon: 'glyphRing' },
 ]
 const danmakuColors = ['#f3efe4', '#ffd28c', '#ff9f9a', '#8fd6ff', '#a8e6b0']
 const danmakuModes: Array<{ key: DanmakuMode; label: string }> = [
@@ -389,10 +380,6 @@ function setSkin(skin: PlayerSkin) {
   prefs.skin = skin
 }
 
-function setGlyph(glyph: PlayGlyph) {
-  prefs.glyph = glyph
-}
-
 function setDanmakuMode(mode: DanmakuMode) {
   prefs.danmakuMode = mode
 }
@@ -572,6 +559,7 @@ function resetPlayer() {
   composerOpen.value = false
   danmakuList.value = []
   danmakuError.value = false
+  progressIconError.value = false
   settingsOpen.value = false
   hoverTime.value = null
   danmakuLayerRef.value?.reset()
@@ -587,6 +575,10 @@ watch(() => props.src, async () => {
   resetPlayer()
   await nextTick()
   videoEl.value?.load()
+})
+
+watch(() => props.progressIcon, () => {
+  progressIconError.value = false
 })
 
 watch(() => prefs.volume, (value) => {
@@ -689,7 +681,7 @@ defineExpose({ play })
 
       <div class="player-top" :class="{ 'is-visible': controlsVisible }">
         <div>
-          <span class="player-kicker">NOW PLAYING · {{ danmakuError ? 'DANMAKU OFFLINE' : `${danmakuCount} DANMAKU` }}</span>
+          <span class="player-kicker">NOW PLAYING{{ danmakuError ? ' · DANMAKU OFFLINE' : '' }}</span>
           <strong>{{ title }}</strong>
         </div>
         <span v-if="danmakuLoading" class="player-top-loading">弹幕载入中</span>
@@ -706,9 +698,9 @@ defineExpose({ play })
           <img v-if="poster" class="overlay-poster" :src="poster" :alt="title">
           <div class="overlay-veil" />
           <span class="overlay-glyph">
-            <PlayerIcon :name="glyphName" :size="46" />
+            <PlayerIcon name="play" :size="46" />
           </span>
-          <span class="overlay-caption">PLAY FILM · {{ danmakuCount }} 条弹幕</span>
+          <span class="overlay-caption">PLAY FILM</span>
         </button>
       </Transition>
 
@@ -719,7 +711,7 @@ defineExpose({ play })
         :aria-label="`继续播放 ${title}`"
         @click="togglePlay"
       >
-        <PlayerIcon :name="glyphName" :size="30" />
+        <PlayerIcon name="play" :size="30" />
       </button>
 
       <div v-if="waiting && started" class="player-spinner" aria-label="正在缓冲"><i /></div>
@@ -878,24 +870,6 @@ defineExpose({ play })
               </div>
             </section>
 
-            <section class="settings-section">
-              <span class="settings-label">播放图标</span>
-              <div class="settings-glyphs">
-                <button
-                  v-for="glyph in glyphs"
-                  :key="glyph.key"
-                  type="button"
-                  class="glyph-choice"
-                  :class="{ 'is-active': prefs.glyph === glyph.key }"
-                  :aria-label="glyph.label"
-                  :title="glyph.label"
-                  @click="setGlyph(glyph.key)"
-                >
-                  <PlayerIcon :name="glyph.icon" :size="22" />
-                </button>
-              </div>
-            </section>
-
             <div class="settings-hint">空格 播放 · ← → 快进 · F 全屏 · D 弹幕</div>
           </div>
           </Transition>
@@ -971,7 +945,18 @@ defineExpose({ play })
           <div class="progress-rail">
             <span class="progress-buffered" :style="{ width: `${bufferedPercent}%` }" />
             <span class="progress-played" :style="{ width: `${progressPercent}%` }" />
-            <span class="progress-thumb" :style="{ left: `${progressPercent}%` }" />
+            <span
+              class="progress-thumb"
+              :class="{ 'has-icon': hasProgressIcon }"
+              :style="{ left: `${progressPercent}%` }"
+            >
+              <img
+                v-if="hasProgressIcon"
+                :src="progressIcon || ''"
+                alt=""
+                @error="progressIconError = true"
+              >
+            </span>
             <span
               v-for="marker in danmakuMarkers"
               :key="marker.id"
@@ -1015,7 +1000,6 @@ defineExpose({ play })
             @click="toggleDanmaku"
           >
             <PlayerIcon :name="prefs.danmakuEnabled ? 'danmaku' : 'danmakuOff'" :size="18" />
-            <span class="danmaku-count">{{ danmakuCount }}</span>
           </button>
 
           <button
@@ -1523,14 +1507,32 @@ defineExpose({ play })
 .progress-thumb {
   position: absolute;
   top: 50%;
+  display: grid;
   width: 12px;
   height: 12px;
+  overflow: hidden;
+  place-items: center;
   border: 2px solid #12100c;
   border-radius: 50%;
   background: var(--pa);
   opacity: 0;
   transform: translate(-50%, -50%);
   transition: opacity 120ms ease, transform 160ms var(--ease-out);
+}
+.progress-thumb.has-icon {
+  width: 26px;
+  height: 26px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+  opacity: 1;
+}
+.progress-thumb.has-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .progress-line:hover .progress-thumb,
 .player-stage.is-seeking .progress-thumb {
@@ -1614,15 +1616,6 @@ defineExpose({ play })
 }
 .danmaku-toggle {
   margin-left: 4px;
-}
-.danmaku-count {
-  margin-left: 1px;
-  color: rgba(243, 239, 228, 0.35);
-  font-family: var(--font-mono);
-  font-size: 7px;
-}
-.danmaku-toggle.is-active .danmaku-count {
-  color: var(--pa);
 }
 .control-spacer {
   flex: 1;
@@ -1874,30 +1867,6 @@ defineExpose({ play })
   border-color: var(--swatch);
   color: #f3efe4;
 }
-.settings-glyphs {
-  display: flex;
-  gap: 6px;
-}
-.glyph-choice {
-  display: grid;
-  width: 38px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid rgba(243, 239, 228, 0.1);
-  border-radius: 6px;
-  color: rgba(243, 239, 228, 0.46);
-  background: transparent;
-  cursor: pointer;
-}
-.glyph-choice:hover {
-  color: #f3efe4;
-  border-color: rgba(243, 239, 228, 0.3);
-}
-.glyph-choice.is-active {
-  border-color: var(--pa);
-  color: var(--pa);
-  background: rgba(var(--pa-rgb), 0.08);
-}
 .settings-hint {
   padding-top: 10px;
   color: rgba(243, 239, 228, 0.28);
@@ -2024,9 +1993,6 @@ defineExpose({ play })
 }
 
 @media (max-width: 460px) {
-  .danmaku-count {
-    display: none;
-  }
   .rate-button {
     min-width: 32px;
     padding: 4px;

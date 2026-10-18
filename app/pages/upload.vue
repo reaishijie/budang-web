@@ -36,8 +36,10 @@ const maxImageSize = computed(() => Number(configValue('MAX_IMAGE_SIZE_BYTES')) 
 const mode = ref<'upload' | 'external'>('upload')
 const videoFile = ref<File | null>(null)
 const coverFile = ref<File | null>(null)
+const playerIconFile = ref<File | null>(null)
 const videoPreview = ref('')
 const coverPreview = ref('')
+const playerIconPreview = ref('')
 const dragActive = ref(false)
 const submitting = ref(false)
 const uploadPercent = ref(0)
@@ -45,6 +47,7 @@ const errorMessage = ref('')
 const selectedTags = ref<number[]>([])
 const videoInput = ref<HTMLInputElement | null>(null)
 const coverInput = ref<HTMLInputElement | null>(null)
+const playerIconInput = ref<HTMLInputElement | null>(null)
 
 const form = reactive({
   title: '',
@@ -52,11 +55,13 @@ const form = reactive({
   categoryId: '',
   videoUrl: '',
   coverUrl: '',
+  playerIconUrl: '',
   duration: 0,
 })
 
 const selectedCategory = computed(() => categories.value.find(item => String(item.id) === form.categoryId) || null)
 const previewCover = computed(() => coverPreview.value || form.coverUrl.trim() || '')
+const previewPlayerIcon = computed(() => playerIconPreview.value || form.playerIconUrl.trim() || '')
 const previewTags = computed(() => tags.value.filter(tag => selectedTags.value.includes(tag.id)).slice(0, 5))
 
 const canSubmit = computed(() => {
@@ -83,6 +88,11 @@ function revokeVideoPreview() {
 function revokeCoverPreview() {
   if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
   coverPreview.value = ''
+}
+
+function revokePlayerIconPreview() {
+  if (playerIconPreview.value) URL.revokeObjectURL(playerIconPreview.value)
+  playerIconPreview.value = ''
 }
 
 async function chooseVideo(file: File | undefined) {
@@ -119,6 +129,22 @@ function chooseCover(file: File | undefined) {
   coverPreview.value = URL.createObjectURL(file)
 }
 
+function choosePlayerIcon(file: File | undefined) {
+  if (!file) return
+  errorMessage.value = ''
+  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+    errorMessage.value = '进度图标请选择 JPEG / PNG / WebP / GIF 图片'
+    return
+  }
+  if (file.size > maxImageSize.value) {
+    errorMessage.value = `进度图标不能超过 ${formatBytes(maxImageSize.value)}`
+    return
+  }
+  revokePlayerIconPreview()
+  playerIconFile.value = file
+  playerIconPreview.value = URL.createObjectURL(file)
+}
+
 function onVideoInput(event: Event) {
   const input = event.target as HTMLInputElement
   void chooseVideo(input.files?.[0])
@@ -128,6 +154,12 @@ function onVideoInput(event: Event) {
 function onCoverInput(event: Event) {
   const input = event.target as HTMLInputElement
   chooseCover(input.files?.[0])
+  input.value = ''
+}
+
+function onPlayerIconInput(event: Event) {
+  const input = event.target as HTMLInputElement
+  choosePlayerIcon(input.files?.[0])
   input.value = ''
 }
 
@@ -146,6 +178,12 @@ function resetCover() {
   revokeCoverPreview()
   coverFile.value = null
   form.coverUrl = ''
+}
+
+function resetPlayerIcon() {
+  revokePlayerIconPreview()
+  playerIconFile.value = null
+  form.playerIconUrl = ''
 }
 
 function switchMode(next: 'upload' | 'external') {
@@ -175,6 +213,10 @@ async function submit() {
   }
   if (form.coverUrl.trim() && !isHttpUrl(form.coverUrl.trim())) {
     errorMessage.value = '封面地址必须是 http(s) 链接，或改为上传图片'
+    return
+  }
+  if (!playerIconFile.value && form.playerIconUrl.trim() && !isHttpUrl(form.playerIconUrl.trim())) {
+    errorMessage.value = '进度图标地址必须是 http(s) 链接，或改为上传图片'
     return
   }
 
@@ -208,6 +250,18 @@ async function submit() {
       if (form.coverUrl.trim()) body.coverUrl = form.coverUrl.trim()
     }
 
+    if (playerIconFile.value) {
+      const uploadedIcon = await uploader.upload(playerIconFile.value, 'IMAGE', (percent) => {
+        uploadPercent.value = Math.max(uploadPercent.value, 90 + Math.round(percent * 0.08))
+      })
+      if (!uploadedIcon.publicUrl) {
+        throw new Error('对象存储未配置公开访问地址，请改用进度图标 URL')
+      }
+      body.playerIconUrl = uploadedIcon.publicUrl
+    } else if (form.playerIconUrl.trim()) {
+      body.playerIconUrl = form.playerIconUrl.trim()
+    }
+
     uploadPercent.value = 98
     const created = await videoApi.createVideo(body)
     uploadPercent.value = 100
@@ -228,6 +282,7 @@ async function submit() {
 onBeforeUnmount(() => {
   revokeVideoPreview()
   revokeCoverPreview()
+  revokePlayerIconPreview()
 })
 
 useSeoMeta({
@@ -356,6 +411,33 @@ useSeoMeta({
                 <span>封面预览</span>
               </div>
             </template>
+
+            <div class="player-icon-upload-row">
+              <div class="player-icon-preview">
+                <img v-if="previewPlayerIcon" :src="previewPlayerIcon" alt="播放进度图标预览">
+                <span v-else class="player-icon-placeholder"><AppIcon name="spark" :size="18" /></span>
+              </div>
+              <div class="player-icon-copy">
+                <strong>播放进度图标</strong>
+                <span>可选。上传后会替换播放进度条上的圆形拖动标志，建议使用透明背景的正方形 PNG / WebP，最大 {{ formatBytes(maxImageSize) }}。</span>
+                <div class="cover-actions">
+                  <button class="btn btn-subtle btn-sm" type="button" @click="playerIconInput?.click()">
+                    <AppIcon name="upload" :size="13" />
+                    {{ playerIconFile ? '更换图标' : '上传图标' }}
+                  </button>
+                  <button v-if="playerIconFile || form.playerIconUrl" class="text-button" type="button" @click="resetPlayerIcon">移除</button>
+                  <input ref="playerIconInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="onPlayerIconInput">
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="player-icon-url">
+                播放进度图标地址
+                <span class="field-label__hint">可选，上传图标后忽略</span>
+              </label>
+              <input id="player-icon-url" v-model="form.playerIconUrl" class="input" type="url" placeholder="https://example.com/progress-icon.png">
+            </div>
           </section>
 
           <section class="form-section panel">
@@ -464,6 +546,10 @@ useSeoMeta({
               <span>{{ mode === 'upload' ? '站内上传' : '外部链接' }}</span>
               <span>{{ form.duration ? formatDuration(form.duration) : '时长待定' }}</span>
               <span>待审核</span>
+            </div>
+            <div v-if="previewPlayerIcon" class="preview-progress-icon">
+              <span>播放进度图标</span>
+              <img :src="previewPlayerIcon" alt="播放进度图标预览">
             </div>
             <div class="preview-hint">
               <AppIcon name="info" :size="13" />
@@ -776,6 +862,72 @@ useSeoMeta({
   color: var(--amber);
 }
 
+.player-icon-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.player-icon-preview {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+}
+.player-icon-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+}
+.player-icon-placeholder {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(243, 184, 95, 0.3);
+  border-radius: 50%;
+  color: var(--amber-bright);
+  background: rgba(243, 184, 95, 0.1);
+}
+.player-icon-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+.player-icon-copy strong {
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 600;
+}
+.player-icon-copy > span {
+  color: var(--muted);
+  font-size: 9.5px;
+  line-height: 1.7;
+}
+.preview-progress-icon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0 0;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 9px;
+}
+.preview-progress-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
 .upload-progress {
   padding: 17px 18px;
 }

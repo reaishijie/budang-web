@@ -101,6 +101,7 @@ export interface Video {
   title: string
   description: string | null
   coverUrl: string | null
+  playerIconUrl: string | null
   duration: number
   status: VideoStatus
   category: Pick<Category, 'id' | 'name'> | null
