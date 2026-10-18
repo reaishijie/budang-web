@@ -838,18 +838,6 @@ useSeoMeta({
   gap: 10px;
   margin-top: 4px;
 }
-.text-button {
-  color: var(--muted);
-  background: transparent;
-  font-size: 9px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.text-button:hover {
-  color: var(--danger);
-}
-
 .cover-banner {
   position: relative;
   overflow: hidden;
