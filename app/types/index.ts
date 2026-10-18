@@ -19,6 +19,7 @@ export type UserRole = 'USER' | 'ADMIN'
 export type UserStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'DISABLED'
 export type VideoStatus = 'PENDING' | 'REJECTED' | 'PUBLISHED' | 'SUSPENDED' | 'OFFLINE'
 export type VoteType = 'LIKE' | 'DISLIKE'
+export type DanmakuMode = 'SCROLL' | 'TOP' | 'BOTTOM'
 export type ConfigVisibility = 'PUBLIC' | 'USER' | 'ADMIN'
 export type EnergyTransactionType = 'ADMIN_ADJUST' | 'INITIAL_BONUS' | 'UPLOAD_COST' | 'REWARD' | 'PENALTY' | 'REFUND'
 export type UploadPurpose = 'VIDEO' | 'IMAGE'
@@ -140,6 +141,22 @@ export interface VideoComment {
   viewerVote: VoteType | null
   createdAt: string
   updatedAt: string
+}
+
+export interface Danmaku {
+  id: number
+  videoId: number
+  content: string
+  time: number
+  mode: DanmakuMode
+  color: string
+  createdAt: string
+  user: VideoUploader | null
+}
+
+export interface DanmakuResult {
+  items: Danmaku[]
+  total: number
 }
 
 export type CommentSort = 'newest' | 'oldest' | 'hottest'

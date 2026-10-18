@@ -5,6 +5,9 @@ import type {
   Category,
   CategoryDetail,
   CommentSort,
+  Danmaku,
+  DanmakuMode,
+  DanmakuResult,
   ConfigItem,
   ConfigVisibility,
   EnergyMe,
@@ -109,6 +112,14 @@ export function useVideoApi() {
         `${API}/videos/${videoId}/comments/${commentId}/vote`,
         { vote },
       ),
+
+    // 弹幕
+    listDanmaku: (videoId: number) =>
+      api.get<DanmakuResult>(`${API}/videos/${videoId}/danmaku`),
+    createDanmaku: (videoId: number, body: { content: string; timeSeconds: number; mode: DanmakuMode; color: string }) =>
+      api.post<Danmaku>(`${API}/videos/${videoId}/danmaku`, body),
+    deleteDanmaku: (videoId: number, danmakuId: number) =>
+      api.delete<null>(`${API}/videos/${videoId}/danmaku/${danmakuId}`),
 
     // 收藏与历史
     listFavorites: (page = 1, pageSize = 12) =>

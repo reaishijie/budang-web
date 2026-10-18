@@ -214,6 +214,7 @@ onBeforeUnmount(() => {
       </nav>
 
       <VideoPlayer
+        :video-id="video.id"
         :src="video.playbackUrl"
         :poster="video.coverUrl"
         :title="video.title"

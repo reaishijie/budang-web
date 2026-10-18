@@ -360,15 +360,6 @@ html[data-theme='light'] body .spotlight-poster .poster-index,
 html[data-theme='light'] body .spotlight-poster .poster-category {
   color: #ffd28c;
 }
-html[data-theme='light'] body .player-frame {
-  --ink: #f3efe4;
-  --ink-soft: #c7c2b6;
-  --muted: #a19b8e;
-  --line: rgba(243, 239, 228, 0.14);
-}
-html[data-theme='light'] body .player-state {
-  color: var(--ink-soft);
-}
 
 /* ---------- Detail ---------- */
 

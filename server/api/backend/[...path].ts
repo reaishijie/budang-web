@@ -27,6 +27,8 @@ const endpointRules: Array<{ path: RegExp; methods: string[] }> = [
   { path: /^api\/videos\/\d+\/comments\/\d+\/vote$/, methods: ['PUT'] },
   { path: /^api\/videos\/\d+\/comments\/\d+$/, methods: ['DELETE'] },
   { path: /^api\/videos\/\d+\/comments$/, methods: ['GET', 'POST'] },
+  { path: /^api\/videos\/\d+\/danmaku$/, methods: ['GET', 'POST'] },
+  { path: /^api\/videos\/\d+\/danmaku\/\d+$/, methods: ['DELETE'] },
   { path: /^api\/videos\/\d+$/, methods: ['GET', 'PATCH', 'DELETE'] },
 
   { path: /^api\/favorites$/, methods: ['GET'] },
