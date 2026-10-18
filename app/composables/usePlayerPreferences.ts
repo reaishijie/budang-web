@@ -7,6 +7,7 @@ export interface PlayerPreferences {
   volume: number
   muted: boolean
   rate: number
+  seekStep: number
   danmakuEnabled: boolean
   danmakuOpacity: number
   danmakuFontSize: number
@@ -23,6 +24,7 @@ const defaults: PlayerPreferences = {
   volume: 0.8,
   muted: false,
   rate: 1,
+  seekStep: 5,
   danmakuEnabled: true,
   danmakuOpacity: 0.9,
   danmakuFontSize: 18,
@@ -34,6 +36,7 @@ const defaults: PlayerPreferences = {
 
 const skins: PlayerSkin[] = ['amber', 'ivory', 'neon', 'crimson']
 const modes: DanmakuMode[] = ['SCROLL', 'TOP', 'BOTTOM']
+const seekSteps = [5, 10, 15, 30]
 const hexColor = /^#[0-9a-fA-F]{6}$/
 
 function clampNumber(value: unknown, min: number, max: number, fallback: number) {
@@ -57,6 +60,9 @@ export function usePlayerPreferences() {
       prefs.rate = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(Number(saved.rate))
         ? Number(saved.rate)
         : defaults.rate
+      prefs.seekStep = seekSteps.includes(Number(saved.seekStep))
+        ? Number(saved.seekStep)
+        : defaults.seekStep
       prefs.danmakuEnabled = typeof saved.danmakuEnabled === 'boolean' ? saved.danmakuEnabled : defaults.danmakuEnabled
       prefs.danmakuOpacity = clampNumber(saved.danmakuOpacity, 0.25, 1, defaults.danmakuOpacity)
       prefs.danmakuFontSize = [14, 18, 22].includes(Number(saved.danmakuFontSize))

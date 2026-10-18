@@ -118,6 +118,7 @@ const danmakuMarkers = computed(() => {
 })
 
 const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2]
+const seekSteps = [5, 10, 15, 30]
 const skins: Array<{ key: PlayerSkin; label: string; color: string }> = [
   { key: 'amber', label: '琥珀', color: '#f3b85f' },
   { key: 'ivory', label: '月白', color: '#f3efe4' },
@@ -526,10 +527,10 @@ function onKeydown(event: KeyboardEvent) {
     togglePlay()
   } else if (key === 'arrowleft') {
     event.preventDefault()
-    seekTo(currentTime.value - 5)
+    seekTo(currentTime.value - prefs.seekStep)
   } else if (key === 'arrowright') {
     event.preventDefault()
-    seekTo(currentTime.value + 5)
+    seekTo(currentTime.value + prefs.seekStep)
   } else if (key === 'arrowup') {
     event.preventDefault()
     setVolume(prefs.volume + 0.05)
@@ -653,7 +654,7 @@ defineExpose({ play })
     <div
       ref="stageEl"
       class="player-stage"
-      :class="{ 'is-idle': !controlsVisible, 'is-seeking': seeking }"
+      :class="{ 'is-idle': !controlsVisible, 'is-seeking': seeking, 'settings-open': settingsOpen }"
       @pointermove="bumpControls"
       @pointerleave="onStageLeave"
     >
@@ -863,6 +864,23 @@ defineExpose({ play })
               </div>
             </section>
 
+            <section v-if="!isMobile" class="settings-section">
+              <span class="settings-label">方向键跳转</span>
+              <div class="settings-options">
+                <button
+                  v-for="step in seekSteps"
+                  :key="step"
+                  type="button"
+                  class="settings-option"
+                  :class="{ 'is-active': prefs.seekStep === step }"
+                  @click="prefs.seekStep = step"
+                >
+                  {{ step }}s
+                </button>
+              </div>
+              <span class="settings-caption">← / → 按此秒数快退、快进</span>
+            </section>
+
             <section class="settings-section">
               <span class="settings-label">播放器主色</span>
               <div class="settings-skins">
@@ -883,7 +901,7 @@ defineExpose({ play })
               </div>
             </section>
 
-            <div class="settings-hint">空格 播放 · ← → 快进 · F 全屏 · D 弹幕</div>
+            <div class="settings-hint">空格 播放 · ← → 快退/快进 {{ prefs.seekStep }}s · F 全屏 · D 弹幕</div>
           </div>
           </Transition>
         </Teleport>
@@ -950,8 +968,8 @@ defineExpose({ play })
           @pointerdown="onProgressDown"
           @pointermove="onProgressHover"
           @pointerleave="onProgressLeave"
-          @keydown.left.prevent.stop="seekTo(currentTime - 5)"
-          @keydown.right.prevent.stop="seekTo(currentTime + 5)"
+          @keydown.left.prevent.stop="seekTo(currentTime - prefs.seekStep)"
+          @keydown.right.prevent.stop="seekTo(currentTime + prefs.seekStep)"
           @keydown.home.prevent.stop="seekTo(0)"
           @keydown.end.prevent.stop="seekTo(duration)"
         >
@@ -1119,6 +1137,10 @@ defineExpose({ play })
 .player-stage.is-idle {
   cursor: none;
 }
+.player-stage.settings-open {
+  /* Settings popover grows upward past the rounded stage; keep it fully visible. */
+  overflow: visible;
+}
 .player-stage:fullscreen {
   width: 100vw;
   height: 100vh;
@@ -1129,6 +1151,7 @@ defineExpose({ play })
 .player-stage:fullscreen .player-video {
   width: 100%;
   height: 100%;
+  border-radius: 0;
 }
 .player-stage:fullscreen .player-top {
   padding: 28px 34px;
@@ -1142,6 +1165,7 @@ defineExpose({ play })
 .player-video {
   width: 100%;
   height: 100%;
+  border-radius: calc(var(--radius-lg) - 1px);
   background: #05060a;
   object-fit: contain;
   cursor: pointer;
@@ -1703,7 +1727,7 @@ defineExpose({ play })
   bottom: calc(100% + 8px);
   z-index: 10;
   width: 320px;
-  max-height: min(68vh, 540px);
+  max-height: min(62vh, 460px);
   overflow-y: auto;
   padding: 16px;
   border: 1px solid rgba(243, 239, 228, 0.14);
@@ -1882,6 +1906,10 @@ defineExpose({ play })
 .skin-swatch.is-active {
   border-color: var(--swatch);
   color: #f3efe4;
+}
+.settings-caption {
+  color: rgba(243, 239, 228, 0.3);
+  font-size: 8px;
 }
 .settings-hint {
   padding-top: 10px;
