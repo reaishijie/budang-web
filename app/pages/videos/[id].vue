@@ -392,8 +392,8 @@ onBeforeUnmount(() => {
               <strong>{{ isAdmin ? '管理员视角' : '创作者视角' }}</strong>
               <span>{{ isAdmin ? '可在审核后台调整影片状态' : '可在我的影片中查看审核进度' }}</span>
             </div>
-            <NuxtLink class="btn btn-subtle btn-sm" :to="isAdmin ? '/admin/review' : '/my/videos'">
-              {{ isAdmin ? '审核后台' : '我的影片' }}
+            <NuxtLink class="btn btn-subtle btn-sm" :to="isAdmin ? `/admin/videos/${video.id}/edit` : '/my/videos'">
+              {{ isAdmin ? '编辑影片' : '我的影片' }}
             </NuxtLink>
           </div>
         </aside>

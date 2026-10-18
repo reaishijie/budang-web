@@ -206,6 +206,10 @@ useSeoMeta({ title: '影片审核', description: '审核、发布、下架光影
         </div>
 
         <div class="review-actions">
+          <NuxtLink class="btn btn-subtle btn-sm" :to="`/admin/videos/${video.id}/edit`">
+            <AppIcon name="edit" :size="13" />
+            编辑
+          </NuxtLink>
           <template v-if="video.status === 'PENDING'">
             <button class="btn btn-primary btn-sm" type="button" :disabled="actingId === video.id" @click="publish(video)">
               <span v-if="actingId === video.id" class="spinner" />
