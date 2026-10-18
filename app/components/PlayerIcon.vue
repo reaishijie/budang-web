@@ -17,6 +17,7 @@ const icons: Record<string, string> = {
   danmaku: '<path d="M4 5.5h16v11H9l-4 3v-3H4Z"/><path d="M8 9.5h8M8 12.5h5.5"/>',
   danmakuOff: '<path d="M4 5.5h16v11H9l-4 3v-3H4Z"/><path d="m8.5 9 5 5m0-5-5 5"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/>',
+  tune: '<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2.2" fill="currentColor" stroke="none"/><circle cx="8" cy="17" r="2.2" fill="currentColor" stroke="none"/>',
   fullscreen: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
   fullscreenExit: '<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>',
   pip: '<rect x="3.5" y="5" width="17" height="14" rx="1.5"/><rect x="12" y="11.5" width="6" height="5" rx="1" fill="currentColor" stroke="none"/>',

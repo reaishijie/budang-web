@@ -865,20 +865,21 @@ defineExpose({ play })
             </section>
 
             <section v-if="!isMobile" class="settings-section">
-              <span class="settings-label">方向键跳转</span>
-              <div class="settings-options">
-                <button
-                  v-for="step in seekSteps"
-                  :key="step"
-                  type="button"
-                  class="settings-option"
-                  :class="{ 'is-active': prefs.seekStep === step }"
-                  @click="prefs.seekStep = step"
-                >
-                  {{ step }}s
-                </button>
+              <div class="settings-row settings-row--wrap">
+                <span class="settings-label">方向键跳转</span>
+                <div class="settings-options settings-options--compact">
+                  <button
+                    v-for="step in seekSteps"
+                    :key="step"
+                    type="button"
+                    class="settings-option"
+                    :class="{ 'is-active': prefs.seekStep === step }"
+                    @click="prefs.seekStep = step"
+                  >
+                    {{ step }}s
+                  </button>
+                </div>
               </div>
-              <span class="settings-caption">← / → 按此秒数快退、快进</span>
             </section>
 
             <section class="settings-section">
@@ -1071,7 +1072,7 @@ defineExpose({ play })
             aria-label="播放器设置"
             @click="toggleSettings"
           >
-            <PlayerIcon name="settings" :size="18" />
+            <PlayerIcon name="tune" :size="18" />
           </button>
 
           <button v-if="pipSupported" type="button" class="player-icon-btn" aria-label="画中画" @click="togglePip">
