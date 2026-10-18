@@ -192,6 +192,7 @@ useSeoMeta({ title: '影片审核', description: '审核、发布、下架光影
         <div class="review-copy">
           <div class="review-topline">
             <span class="badge" :class="`badge--${videoStatusTone(video.status)}`">{{ VIDEO_STATUS_LABEL[video.status] }}</span>
+            <span v-if="video.duration <= 0" class="badge badge--red">时长缺失</span>
             <span v-if="video.category" class="review-category">{{ video.category.name }}</span>
             <span class="review-id">NO. {{ String(video.id).padStart(4, '0') }}</span>
           </div>

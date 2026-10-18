@@ -187,6 +187,10 @@ useSeoMeta({ title: '管理概览', description: '光影放映控制室概览。
             </div>
           </header>
           <div class="panel-body quick-list">
+            <NuxtLink to="/admin/durations">
+              <span><AppIcon name="clock" :size="16" />时长校准</span>
+              <AppIcon name="chevronRight" :size="14" />
+            </NuxtLink>
             <NuxtLink to="/admin/users">
               <span><AppIcon name="users" :size="16" />用户与上传权限</span>
               <AppIcon name="chevronRight" :size="14" />

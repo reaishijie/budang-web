@@ -44,7 +44,6 @@ const playerIconPreview = ref('')
 const dragActive = ref(false)
 const submitting = ref(false)
 const probingDuration = ref(false)
-const durationEditing = ref(false)
 const uploadPercent = ref(0)
 const errorMessage = ref('')
 const selectedTags = ref<number[]>([])
@@ -222,7 +221,6 @@ watch(() => form.videoUrl, (value) => {
 function switchMode(next: 'upload' | 'external') {
   mode.value = next
   errorMessage.value = ''
-  durationEditing.value = false
   if (next === 'external' && form.duration <= 0) {
     void probeExternalDuration()
   }
@@ -531,28 +529,12 @@ useSeoMeta({
                 <span class="field-label">影片时长</span>
                 <div class="duration-auto">
                   <strong>{{ form.duration > 0 ? formatDuration(form.duration) : probingDuration ? '正在读取…' : '待读取' }}</strong>
-                  <span v-if="mode === 'upload'">从本地视频自动读取，无需填写秒数</span>
+                  <span v-if="mode === 'upload' && form.duration > 0">从本地视频自动读取，无需填写秒数</span>
+                  <span v-else-if="mode === 'upload'">未能读取，提交后由管理员校准</span>
                   <span v-else-if="probingDuration">正在从视频地址读取元数据</span>
-                  <span v-else>自动读取；失败时可手动修正</span>
-                  <button
-                    v-if="mode === 'external' && !durationEditing"
-                    type="button"
-                    class="duration-edit"
-                    @click="durationEditing = true"
-                  >
-                    手动修正
-                  </button>
+                  <span v-else-if="form.duration > 0">自动读取；无需填写秒数</span>
+                  <span v-else>未能读取，提交后由管理员校准</span>
                 </div>
-                <input
-                  v-if="mode === 'external' && (durationEditing || (form.duration <= 0 && !probingDuration))"
-                  v-model.number="form.duration"
-                  class="input duration-input"
-                  type="number"
-                  min="0"
-                  max="86400"
-                  step="1"
-                  placeholder="自动读取失败时，手动填写秒数"
-                >
               </div>
             </div>
 
@@ -931,23 +913,6 @@ useSeoMeta({
 .duration-auto span {
   color: var(--muted);
   font-size: 9.5px;
-}
-.duration-input {
-  margin-top: 7px;
-}
-.duration-edit {
-  margin-left: auto;
-  padding: 3px 0;
-  border: 0;
-  color: var(--amber-bright);
-  background: transparent;
-  font-family: var(--font-mono);
-  font-size: 8px;
-  cursor: pointer;
-}
-.duration-edit:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 .form-row {
   display: grid;

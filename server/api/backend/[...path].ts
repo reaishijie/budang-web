@@ -16,6 +16,7 @@ const endpointRules: Array<{ path: RegExp; methods: string[] }> = [
   { path: /^api\/tags\/\d+$/, methods: ['PATCH', 'DELETE'] },
 
   { path: /^api\/videos\/admin\/review-queue$/, methods: ['GET'] },
+  { path: /^api\/videos\/admin\/missing-durations$/, methods: ['GET'] },
   { path: /^api\/videos\/mine$/, methods: ['GET'] },
   { path: /^api\/videos$/, methods: ['GET', 'POST'] },
   { path: /^api\/videos\/\d+\/status$/, methods: ['PATCH'] },

@@ -81,6 +81,8 @@ export function useVideoApi() {
       api.get<PaginatedResult<Video>>(`${API}/videos/mine`, query as Record<string, string | number>),
     listReviewQueue: (query: AdminVideoQuery) =>
       api.get<PaginatedResult<Video>>(`${API}/videos/admin/review-queue`, query as Record<string, string | number>),
+    listMissingDurations: (page = 1, pageSize = 20) =>
+      api.get<PaginatedResult<Video>>(`${API}/videos/admin/missing-durations`, { page, pageSize }),
     createVideo: (body: Record<string, unknown>) =>
       api.post<VideoDetail>(`${API}/videos`, body),
     updateVideo: (id: number, body: Record<string, unknown>) =>

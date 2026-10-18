@@ -5,6 +5,7 @@ const auth = useAuth()
 const navItems = [
   { to: '/admin', label: '概览', icon: 'grid', exact: true },
   { to: '/admin/review', label: '影片审核', icon: 'film' },
+  { to: '/admin/durations', label: '时长校准', icon: 'clock' },
   { to: '/admin/users', label: '用户与权限', icon: 'users' },
   { to: '/admin/taxonomy', label: '分类与标签', icon: 'layers' },
   { to: '/admin/configs', label: '站点配置', icon: 'sliders' },
