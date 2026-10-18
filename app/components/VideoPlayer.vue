@@ -117,7 +117,7 @@ const danmakuMarkers = computed(() => {
     }))
 })
 
-const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2]
+const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2, 3]
 const seekSteps = [5, 10, 15, 30]
 const skins: Array<{ key: PlayerSkin; label: string; color: string }> = [
   { key: 'amber', label: '琥珀', color: '#f3b85f' },

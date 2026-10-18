@@ -57,7 +57,7 @@ export function usePlayerPreferences() {
       const saved = JSON.parse(raw) as Partial<PlayerPreferences>
       prefs.volume = clampNumber(saved.volume, 0, 1, defaults.volume)
       prefs.muted = typeof saved.muted === 'boolean' ? saved.muted : defaults.muted
-      prefs.rate = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(Number(saved.rate))
+      prefs.rate = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 3].includes(Number(saved.rate))
         ? Number(saved.rate)
         : defaults.rate
       prefs.seekStep = seekSteps.includes(Number(saved.seekStep))
