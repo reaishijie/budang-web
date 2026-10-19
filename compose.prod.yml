@@ -1,9 +1,9 @@
-name: video-web
+name: budang-web
 
 services:
   app:
     image: ${IMAGE:?IMAGE must be provided}
-    container_name: video-web
+    container_name: budang-web
     restart: unless-stopped
     init: true
     stop_grace_period: 30s
