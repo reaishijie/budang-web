@@ -23,7 +23,7 @@ Protect `main` and optionally configure production environment reviewers. If `DE
 
 - Docker Engine and Docker Compose v2 installed; SSH account can use Docker.
 - Create the external Docker network `1panel-network`. The backend API must be joined to this network so Nuxt can reach it by container DNS name.
-- Create `$DEPLOY_PATH/.env.production` with mode `0600`. Configure `NUXT_API_BASE_URL` to the backend's address on the shared Docker network (for example `http://budang:3000`), and set `NUXT_PUBLIC_SITE_URL` to the public HTTPS origin.
+- Create `$DEPLOY_PATH/.env.production` with mode `0600`. Configure `NUXT_API_BASE_URL` to the backend's address on the shared Docker network (for example `http://budang-api:3000`), and set `NUXT_PUBLIC_SITE_URL` to the public HTTPS origin.
 - Configure the reverse proxy/TLS and firewall. Host port defaults to `9890` (`APP_PORT` can be set in `.env.production`).
 
 The workflow uploads `compose.prod.yml` to the dedicated deployment directory. Existing container name must be `budang-web` for health checks and rollback detection. The Docker healthcheck checks `/health`.
