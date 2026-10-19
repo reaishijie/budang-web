@@ -1,0 +1,26 @@
+name: budang-web
+
+services:
+  app:
+    image: ${IMAGE:?IMAGE must be provided}
+    container_name: budang-web
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+    ports:
+      - "${APP_PORT:-9890}:3000"
+    networks:
+      - app
+      - database
+
+networks:
+  app:
+  database:
+    external: true
+    name: 1panel-network
