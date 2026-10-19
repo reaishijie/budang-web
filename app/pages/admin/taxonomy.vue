@@ -390,6 +390,36 @@ useSeoMeta({ title: '分类与标签', description: '管理补档的放映分类
   gap: 8px;
 }
 
+.row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.025);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.row-action:hover {
+  color: var(--amber-bright);
+  border-color: color-mix(in srgb, var(--amber) 24%, transparent);
+  background: color-mix(in srgb, var(--amber) 8%, transparent);
+}
+.row-action--danger {
+  color: color-mix(in srgb, var(--danger) 78%, var(--muted));
+  border-color: color-mix(in srgb, var(--danger) 20%, var(--line));
+}
+.row-action--danger:hover {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 24%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
 .tag-create {
   display: flex;
   gap: 7px;
@@ -431,7 +461,8 @@ useSeoMeta({ title: '分类与标签', description: '管理补档的放映分类
   font-size: 7.5px;
 }
 .tag-row .row-action {
-  font-size: 8px;
+  padding: 2px 6px;
+  font-size: 7.5px;
 }
 
 .taxonomy-empty {

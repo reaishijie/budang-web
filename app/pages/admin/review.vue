@@ -81,21 +81,47 @@ async function publish(video: Video) {
   }
 }
 
-async function setOffline(video: Video, next: VideoStatus) {
-  if (!import.meta.client || actingId.value) return
-  const prompts: Record<string, string> = {
-    SUSPENDED: `确定下架《${video.title}》吗？下架后作者不可编辑。`,
-    OFFLINE: `确定下线《${video.title}》吗？`,
-  }
-  if (!window.confirm(prompts[next] || '确定执行此操作吗？')) return
-  actingId.value = video.id
+type OfflineStatus = 'SUSPENDED' | 'OFFLINE'
+
+const offlineOpen = ref(false)
+const offlineTarget = ref<Video | null>(null)
+const offlineNext = ref<OfflineStatus>('OFFLINE')
+const offlineSaving = ref(false)
+
+const offlineCopy = computed(() => offlineNext.value === 'SUSPENDED'
+  ? {
+      title: '下架影片',
+      description: 'SUSPEND VIDEO',
+      action: '确认下架',
+      warning: '下架后影片会从公开片库移除，作者将暂时不能编辑，直到管理员恢复发布。',
+    }
+  : {
+      title: '下线影片',
+      description: 'TAKE OFFLINE',
+      action: '确认下线',
+      warning: '下线后影片会从公开片库移除，但不会标记为违规下架，之后可以恢复发布。',
+    })
+
+function openOffline(video: Video, next: OfflineStatus) {
+  if (actingId.value || offlineSaving.value) return
+  offlineTarget.value = video
+  offlineNext.value = next
+  offlineOpen.value = true
+}
+
+async function confirmOffline() {
+  if (!offlineTarget.value || offlineSaving.value) return
+  offlineSaving.value = true
+  actingId.value = offlineTarget.value.id
   try {
-    await videoApi.updateVideoStatus(video.id, { status: next })
-    toast.success(next === 'SUSPENDED' ? '影片已下架' : '影片已下线')
+    await videoApi.updateVideoStatus(offlineTarget.value.id, { status: offlineNext.value })
+    toast.success(offlineNext.value === 'SUSPENDED' ? '影片已下架' : '影片已下线')
+    offlineOpen.value = false
     await refresh()
   } catch (error) {
     toast.error(error instanceof Error ? error.message : '操作失败')
   } finally {
+    offlineSaving.value = false
     actingId.value = null
   }
 }
@@ -223,10 +249,10 @@ useSeoMeta({ title: '影片审核', description: '审核、发布、下架补档
             </button>
           </template>
           <template v-else-if="video.status === 'PUBLISHED'">
-            <button class="btn btn-ghost btn-sm" type="button" :disabled="actingId === video.id" @click="setOffline(video, 'OFFLINE')">
+            <button class="btn btn-ghost btn-sm" type="button" :disabled="actingId === video.id" @click="openOffline(video, 'OFFLINE')">
               下线
             </button>
-            <button class="btn btn-danger btn-sm" type="button" :disabled="actingId === video.id" @click="setOffline(video, 'SUSPENDED')">
+            <button class="btn btn-danger btn-sm" type="button" :disabled="actingId === video.id" @click="openOffline(video, 'SUSPENDED')">
               下架
             </button>
           </template>
@@ -285,6 +311,30 @@ useSeoMeta({ title: '影片审核', description: '审核、发布、下架补档
           <span v-if="rejecting" class="spinner" />
           <AppIcon v-else name="close" :size="13" />
           确认驳回
+        </button>
+      </template>
+    </ModalDialog>
+
+    <ModalDialog
+      :open="offlineOpen"
+      :title="offlineCopy.title"
+      :description="offlineCopy.description"
+      width="460px"
+      @close="offlineOpen = false"
+    >
+      <div class="offline-modal">
+        <p>《{{ offlineTarget?.title }}》</p>
+        <div class="offline-warning">
+          <AppIcon name="alert" :size="16" />
+          <span>{{ offlineCopy.warning }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn btn-ghost btn-sm" type="button" :disabled="offlineSaving" @click="offlineOpen = false">取消</button>
+        <button class="btn btn-danger btn-sm" type="button" :disabled="offlineSaving" @click="confirmOffline">
+          <span v-if="offlineSaving" class="spinner" />
+          <AppIcon v-else name="close" :size="13" />
+          {{ offlineCopy.action }}
         </button>
       </template>
     </ModalDialog>
@@ -527,6 +577,36 @@ useSeoMeta({ title: '影片审核', description: '审核、发布、下架补档
   display: grid;
   gap: 14px;
 }
+
+
+.offline-modal {
+  display: grid;
+  gap: 13px;
+}
+.offline-modal > p {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1.3;
+}
+.offline-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--danger) 22%, var(--line));
+  border-radius: 9px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--danger) 6%, transparent);
+  font-size: 10px;
+  line-height: 1.7;
+}
+.offline-warning :deep(svg) {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--danger);
+}
+
 .reject-modal > p {
   color: var(--ink-soft);
   font-family: var(--font-display);

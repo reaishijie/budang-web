@@ -71,6 +71,9 @@ const isMobile = ref(false)
 
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 let frame: number | null = null
+let lastStageTapAt = 0
+let lastStageTapX = 0
+let lastStageTapY = 0
 let mobileQuery: MediaQueryList | null = null
 
 const user = auth.user
@@ -202,9 +205,49 @@ function togglePlay() {
   }
 }
 
-function onVideoClick() {
+const interactiveStageSelector = [
+  '.player-controls',
+  '.player-settings-panel',
+  '.player-settings-backdrop',
+  '.danmaku-composer',
+  '.player-overlay',
+  '.center-play',
+  '.player-state-btn',
+  'button',
+  'input',
+  'textarea',
+  'select',
+  'a',
+].join(',')
+
+function isPlayerInteractiveTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(target.closest(interactiveStageSelector))
+}
+
+function onStagePointerUp(event: PointerEvent) {
+  if (event.pointerType === 'mouse' && event.button !== 0) return
+  if (isPlayerInteractiveTarget(event.target)) return
+
+  // A single click only reveals the controls. Play/pause requires a double tap/click,
+  // the dedicated play buttons, or the centered play overlay.
+  const now = performance.now()
+  const dx = event.clientX - lastStageTapX
+  const dy = event.clientY - lastStageTapY
+  const isDoubleTap = lastStageTapAt > 0
+    && now - lastStageTapAt <= 340
+    && Math.hypot(dx, dy) <= 30
+
+  if (isDoubleTap) {
+    lastStageTapAt = 0
+    togglePlay()
+    return
+  }
+
+  lastStageTapAt = now
+  lastStageTapX = event.clientX
+  lastStageTapY = event.clientY
   shellEl.value?.focus({ preventScroll: true })
-  togglePlay()
+  bumpControls()
 }
 
 function onPlay() {
@@ -390,6 +433,20 @@ function closeSettings() {
   showControls()
 }
 
+function hidePlayerMenus() {
+  // Leaving the composer via blur would normally show controls again, so do it first.
+  composerInput.value?.blur()
+  settingsOpen.value = false
+  composerOpen.value = false
+  composerFocused.value = false
+  controlsVisible.value = false
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  shellEl.value?.focus({ preventScroll: true })
+}
+
 function setSkin(skin: PlayerSkin) {
   prefs.skin = skin
 }
@@ -515,6 +572,14 @@ function onLeavePip() {
 }
 
 function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && settingsOpen.value) {
+    event.preventDefault()
+    closeSettings()
+    return
+  }
+  // The settings panel owns arrow keys for scrolling while it is open.
+  if (settingsOpen.value) return
+
   const target = event.target as HTMLElement | null
   if (target && (
     target.isContentEditable ||
@@ -655,6 +720,7 @@ defineExpose({ play })
       ref="stageEl"
       class="player-stage"
       :class="{ 'is-idle': !controlsVisible, 'is-seeking': seeking, 'settings-open': settingsOpen }"
+      @pointerup="onStagePointerUp"
       @pointermove="bumpControls"
       @pointerleave="onStageLeave"
     >
@@ -666,7 +732,6 @@ defineExpose({ play })
         :poster="poster || undefined"
         playsinline
         preload="metadata"
-        @click="onVideoClick"
         @play="onPlay"
         @pause="onPause"
         @ended="onEnded"
@@ -1091,6 +1156,13 @@ defineExpose({ play })
             <PlayerIcon :name="isFullscreen ? 'fullscreenExit' : 'fullscreen'" :size="18" />
           </button>
         </div>
+
+        <div class="controls-collapse-row">
+          <button type="button" class="controls-collapse-btn" aria-label="收起播放器全部菜单" @click="hidePlayerMenus">
+            <PlayerIcon name="chevronDown" :size="13" />
+            收起菜单
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1136,6 +1208,8 @@ defineExpose({ play })
   background: #05060a;
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
   isolation: isolate;
+  user-select: none;
+  touch-action: manipulation;
 }
 .player-stage.is-idle {
   cursor: none;
@@ -1923,6 +1997,29 @@ defineExpose({ play })
   font-family: var(--font-mono);
   font-size: 7.5px;
   letter-spacing: 0.03em;
+}
+
+.controls-collapse-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px;
+}
+.controls-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 0;
+  color: rgba(243, 239, 228, 0.28);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+.controls-collapse-btn:hover {
+  color: rgba(243, 239, 228, 0.78);
 }
 
 .player-caption {
