@@ -37,7 +37,7 @@ if [[ "$command" == *'docker login ghcr.io'* ]]; then
   exit
 fi
 
-if [[ "$command" == *'if docker inspect video-web'* ]]; then
+if [[ "$command" == *'if docker inspect budang-web'* ]]; then
   if [[ -n "${MOCK_PREVIOUS_IMAGE:-}" ]]; then
     printf '%s' "$MOCK_PREVIOUS_IMAGE"
   fi
