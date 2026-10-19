@@ -411,7 +411,10 @@ function bumpControls() {
   showControls()
 }
 
-function onStageLeave() {
+function onStageLeave(event: PointerEvent) {
+  // Touch/pen devices emit pointerleave immediately after a tap. Hiding here would
+  // cancel the controls that the same tap just revealed; let the normal timer do it.
+  if (event.pointerType !== 'mouse') return
   if (playing.value && !settingsOpen.value && !composerFocused.value) {
     controlsVisible.value = false
   }
@@ -1110,6 +1113,15 @@ defineExpose({ play })
             <PlayerIcon name="send" :size="16" />
           </button>
 
+          <button
+            type="button"
+            class="player-icon-btn controls-collapse-btn"
+            aria-label="收起播放器全部菜单"
+            @click="hidePlayerMenus"
+          >
+            <PlayerIcon name="chevronDown" :size="18" />
+          </button>
+
           <span class="control-spacer" />
 
           <button type="button" class="rate-button" :aria-label="`播放速度 ${rateLabel}`" @click="toggleSettings">
@@ -1154,13 +1166,6 @@ defineExpose({ play })
             @click="toggleFullscreen"
           >
             <PlayerIcon :name="isFullscreen ? 'fullscreenExit' : 'fullscreen'" :size="18" />
-          </button>
-        </div>
-
-        <div class="controls-collapse-row">
-          <button type="button" class="controls-collapse-btn" aria-label="收起播放器全部菜单" @click="hidePlayerMenus">
-            <PlayerIcon name="chevronDown" :size="13" />
-            收起菜单
           </button>
         </div>
       </div>
@@ -1999,27 +2004,11 @@ defineExpose({ play })
   letter-spacing: 0.03em;
 }
 
-.controls-collapse-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 5px;
-}
 .controls-collapse-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border: 0;
-  color: rgba(243, 239, 228, 0.28);
-  background: transparent;
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: color 160ms ease;
+  color: rgba(243, 239, 228, 0.36);
 }
 .controls-collapse-btn:hover {
-  color: rgba(243, 239, 228, 0.78);
+  color: rgba(243, 239, 228, 0.82);
 }
 
 .player-caption {
