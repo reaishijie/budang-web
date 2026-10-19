@@ -38,6 +38,10 @@ const mode = ref<'upload' | 'external'>('upload')
 const videoFile = ref<File | null>(null)
 const coverFile = ref<File | null>(null)
 const playerIconFile = ref<File | null>(null)
+const uploadedVideoFileId = ref<string | null>(null)
+const uploadedCoverFileId = ref<string | null>(null)
+const uploadedPlayerIconFileId = ref<string | null>(null)
+const uploadedPlayerIconUrl = ref<string | null>(null)
 const videoPreview = ref('')
 const coverPreview = ref('')
 const playerIconPreview = ref('')
@@ -115,6 +119,7 @@ async function chooseVideo(file: File | undefined) {
     return
   }
   revokeVideoPreview()
+  uploadedVideoFileId.value = null
   videoFile.value = file
   videoPreview.value = URL.createObjectURL(file)
   const duration = await uploader.videoDuration(file)
@@ -133,6 +138,7 @@ function chooseCover(file: File | undefined) {
     return
   }
   revokeCoverPreview()
+  uploadedCoverFileId.value = null
   coverFile.value = file
   coverPreview.value = URL.createObjectURL(file)
 }
@@ -149,6 +155,8 @@ function choosePlayerIcon(file: File | undefined) {
     return
   }
   revokePlayerIconPreview()
+  uploadedPlayerIconFileId.value = null
+  uploadedPlayerIconUrl.value = null
   playerIconFile.value = file
   playerIconPreview.value = URL.createObjectURL(file)
 }
@@ -184,18 +192,23 @@ function toggleTag(id: number) {
 
 function resetCover() {
   revokeCoverPreview()
+  uploadedCoverFileId.value = null
   coverFile.value = null
   form.coverUrl = ''
 }
 
 function resetPlayerIcon() {
   revokePlayerIconPreview()
+  uploadedPlayerIconFileId.value = null
+  uploadedPlayerIconUrl.value = null
   playerIconFile.value = null
   form.playerIconUrl = ''
 }
 
 function selectPlayerIconPreset(url: string) {
   revokePlayerIconPreview()
+  uploadedPlayerIconFileId.value = null
+  uploadedPlayerIconUrl.value = null
   playerIconFile.value = null
   form.playerIconUrl = url
 }
@@ -267,16 +280,22 @@ async function submit() {
     }
 
     if (mode.value === 'upload' && videoFile.value) {
-      const uploadedVideo = await uploader.upload(videoFile.value, 'VIDEO', (percent) => {
-        uploadPercent.value = Math.round(percent * 0.72)
-      })
-      body.videoFileId = uploadedVideo.id
+      if (!uploadedVideoFileId.value) {
+        const uploadedVideo = await uploader.upload(videoFile.value, 'VIDEO', (percent) => {
+          uploadPercent.value = Math.round(percent * 0.72)
+        })
+        uploadedVideoFileId.value = uploadedVideo.id
+      }
+      body.videoFileId = uploadedVideoFileId.value
 
       if (coverFile.value) {
-        const uploadedCover = await uploader.upload(coverFile.value, 'IMAGE', (percent) => {
-          uploadPercent.value = 72 + Math.round(percent * 0.24)
-        })
-        body.coverFileId = uploadedCover.id
+        if (!uploadedCoverFileId.value) {
+          const uploadedCover = await uploader.upload(coverFile.value, 'IMAGE', (percent) => {
+            uploadPercent.value = 72 + Math.round(percent * 0.24)
+          })
+          uploadedCoverFileId.value = uploadedCover.id
+        }
+        body.coverFileId = uploadedCoverFileId.value
       } else if (form.coverUrl.trim()) {
         body.coverUrl = form.coverUrl.trim()
       }
@@ -287,13 +306,18 @@ async function submit() {
 
     if (isAdmin.value) {
       if (playerIconFile.value) {
-        const uploadedIcon = await uploader.upload(playerIconFile.value, 'PLAYER_ICON', (percent) => {
-          uploadPercent.value = Math.max(uploadPercent.value, 90 + Math.round(percent * 0.08))
-        })
-        if (!uploadedIcon.publicUrl) {
-          throw new Error('对象存储未配置公开访问地址，请改用进度图标 URL')
+        if (!uploadedPlayerIconFileId.value) {
+          const uploadedIcon = await uploader.upload(playerIconFile.value, 'PLAYER_ICON', (percent) => {
+            uploadPercent.value = Math.max(uploadPercent.value, 90 + Math.round(percent * 0.08))
+          })
+          uploadedPlayerIconFileId.value = uploadedIcon.id
+          uploadedPlayerIconUrl.value = uploadedIcon.publicUrl
         }
-        body.playerIconUrl = uploadedIcon.publicUrl
+        if (!uploadedPlayerIconUrl.value) {
+          toast.error('对象存储未配置公开访问地址，本次跳过自定义进度图标；影片仍会继续提交')
+        } else {
+          body.playerIconUrl = uploadedPlayerIconUrl.value
+        }
       } else if (form.playerIconUrl.trim()) {
         body.playerIconUrl = form.playerIconUrl.trim()
       }
@@ -306,7 +330,9 @@ async function submit() {
     await navigateTo('/my/videos')
   } catch (error) {
     const message = error instanceof Error ? error.message : '提交失败，请稍后重试'
-    errorMessage.value = message
+    errorMessage.value = mode.value === 'upload' && uploadedVideoFileId.value
+      ? `视频文件已上传，但影片记录提交失败：${message}。修正问题后可再次提交，无需重新上传视频。`
+      : message
     if (message.includes('对象存储')) {
       errorMessage.value = `${message}。你也可以切换到“外部链接”提交视频地址。`
     }
