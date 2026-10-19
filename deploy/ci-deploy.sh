@@ -78,7 +78,7 @@ wait_for_healthy() {
 
   # Docker health checks run every 30 seconds; allow startup plus retries.
   for ((attempt = 1; attempt <= 60; attempt++)); do
-    if ! health="$(ssh_remote "docker inspect --format '{{.State.Health.Status}}' video-web 2>/dev/null || true")"; then
+    if ! health="$(ssh_remote "docker inspect --format '{{.State.Health.Status}}' budang-web 2>/dev/null || true")"; then
       return 1
     fi
 
@@ -194,7 +194,7 @@ ssh_remote \
 scp "${scp_options[@]}" compose.prod.yml "$remote:$DEPLOY_PATH/compose.prod.yml"
 
 previous_image=$(ssh_remote \
-  "if docker inspect video-web >/dev/null 2>&1; then docker inspect --format '{{.Config.Image}}' video-web; fi")
+  "if docker inspect budang-web >/dev/null 2>&1; then docker inspect --format '{{.Config.Image}}' budang-web; fi")
 if [[ -n "$previous_image" ]]; then
   previous_tag=${previous_image#"$image_name:"}
   if [[ "$previous_image" != "$image_name:"* || ! "$previous_tag" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
