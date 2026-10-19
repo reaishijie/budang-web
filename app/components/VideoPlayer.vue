@@ -71,6 +71,9 @@ const isMobile = ref(false)
 
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 let frame: number | null = null
+let lastStageTapAt = 0
+let lastStageTapX = 0
+let lastStageTapY = 0
 let mobileQuery: MediaQueryList | null = null
 
 const user = auth.user
@@ -202,9 +205,49 @@ function togglePlay() {
   }
 }
 
-function onVideoClick() {
+const interactiveStageSelector = [
+  '.player-controls',
+  '.player-settings-panel',
+  '.player-settings-backdrop',
+  '.danmaku-composer',
+  '.player-overlay',
+  '.center-play',
+  '.player-state-btn',
+  'button',
+  'input',
+  'textarea',
+  'select',
+  'a',
+].join(',')
+
+function isPlayerInteractiveTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(target.closest(interactiveStageSelector))
+}
+
+function onStagePointerUp(event: PointerEvent) {
+  if (event.pointerType === 'mouse' && event.button !== 0) return
+  if (isPlayerInteractiveTarget(event.target)) return
+
+  // A single click only reveals the controls. Play/pause requires a double tap/click,
+  // the dedicated play buttons, or the centered play overlay.
+  const now = performance.now()
+  const dx = event.clientX - lastStageTapX
+  const dy = event.clientY - lastStageTapY
+  const isDoubleTap = lastStageTapAt > 0
+    && now - lastStageTapAt <= 340
+    && Math.hypot(dx, dy) <= 30
+
+  if (isDoubleTap) {
+    lastStageTapAt = 0
+    togglePlay()
+    return
+  }
+
+  lastStageTapAt = now
+  lastStageTapX = event.clientX
+  lastStageTapY = event.clientY
   shellEl.value?.focus({ preventScroll: true })
-  togglePlay()
+  bumpControls()
 }
 
 function onPlay() {
@@ -515,6 +558,14 @@ function onLeavePip() {
 }
 
 function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && settingsOpen.value) {
+    event.preventDefault()
+    closeSettings()
+    return
+  }
+  // The settings panel owns arrow keys for scrolling while it is open.
+  if (settingsOpen.value) return
+
   const target = event.target as HTMLElement | null
   if (target && (
     target.isContentEditable ||
@@ -655,6 +706,7 @@ defineExpose({ play })
       ref="stageEl"
       class="player-stage"
       :class="{ 'is-idle': !controlsVisible, 'is-seeking': seeking, 'settings-open': settingsOpen }"
+      @pointerup="onStagePointerUp"
       @pointermove="bumpControls"
       @pointerleave="onStageLeave"
     >
@@ -666,7 +718,6 @@ defineExpose({ play })
         :poster="poster || undefined"
         playsinline
         preload="metadata"
-        @click="onVideoClick"
         @play="onPlay"
         @pause="onPause"
         @ended="onEnded"
@@ -903,6 +954,10 @@ defineExpose({ play })
             </section>
 
             <div class="settings-hint">空格 播放 · ← → 快退/快进 {{ prefs.seekStep }}s · F 全屏 · D 弹幕</div>
+            <button type="button" class="settings-dismiss" @click="closeSettings">
+              <PlayerIcon name="chevronDown" :size="14" />
+              收起菜单
+            </button>
           </div>
           </Transition>
         </Teleport>
@@ -1136,6 +1191,8 @@ defineExpose({ play })
   background: #05060a;
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
   isolation: isolate;
+  user-select: none;
+  touch-action: manipulation;
 }
 .player-stage.is-idle {
   cursor: none;
@@ -1923,6 +1980,29 @@ defineExpose({ play })
   font-family: var(--font-mono);
   font-size: 7.5px;
   letter-spacing: 0.03em;
+}
+.settings-dismiss {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(243, 239, 228, 0.12);
+  border-radius: 7px;
+  color: rgba(243, 239, 228, 0.6);
+  background: rgba(243, 239, 228, 0.03);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.settings-dismiss:hover {
+  color: #f3efe4;
+  border-color: rgba(243, 239, 228, 0.3);
+  background: rgba(243, 239, 228, 0.07);
 }
 
 .player-caption {
