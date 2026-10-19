@@ -10,14 +10,14 @@ Create the `production` environment and configure:
 |---|---|---|
 | `DEPLOY_HOST` | Variable | Server hostname/IP |
 | `DEPLOY_PORT` | Variable, optional | SSH port; defaults to `22` |
-| `DEPLOY_PATH` | Variable, optional | Dedicated remote directory; defaults to `/opt/video-web` |
-| `DEPLOY_USER` | Secret | Dedicated SSH deployment account |
+| `DEPLOY_PATH` | Variable, optional | Dedicated remote directory; defaults to `/opt/production/video-web` |
+| `DEPLOY_USER` | Secret, optional | SSH account; defaults to `root` (prefer a dedicated least-privilege account) |
 | `DEPLOY_SSH_PRIVATE_KEY` | Secret | Private key authorized for deployment |
 | `DEPLOY_KNOWN_HOSTS` | Secret | Pre-verified SSH host key line(s) |
 
 Enable Actions `GITHUB_TOKEN` package write access. The workflow publishes to `ghcr.io/<owner>/<repository>`. Ensure the package is readable by the token used by the server; for a private package, a dedicated least-privilege read token may be needed on the server.
 
-Protect `main` and optionally configure production environment reviewers.
+Protect `main` and optionally configure production environment reviewers. If `DEPLOY_USER` is omitted, the workflow connects as `root`; root SSH login and its `authorized_keys` must be configured. Prefer setting a dedicated least-privilege user Secret instead. `DEPLOY_PORT` defaults to `22`, and `DEPLOY_PATH` defaults to `/opt/production/video-web`.
 
 ## Server prerequisites
 
