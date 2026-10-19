@@ -433,6 +433,20 @@ function closeSettings() {
   showControls()
 }
 
+function hidePlayerMenus() {
+  // Leaving the composer via blur would normally show controls again, so do it first.
+  composerInput.value?.blur()
+  settingsOpen.value = false
+  composerOpen.value = false
+  composerFocused.value = false
+  controlsVisible.value = false
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  shellEl.value?.focus({ preventScroll: true })
+}
+
 function setSkin(skin: PlayerSkin) {
   prefs.skin = skin
 }
@@ -954,10 +968,6 @@ defineExpose({ play })
             </section>
 
             <div class="settings-hint">空格 播放 · ← → 快退/快进 {{ prefs.seekStep }}s · F 全屏 · D 弹幕</div>
-            <button type="button" class="settings-dismiss" @click="closeSettings">
-              <PlayerIcon name="chevronDown" :size="14" />
-              收起菜单
-            </button>
           </div>
           </Transition>
         </Teleport>
@@ -1144,6 +1154,13 @@ defineExpose({ play })
             @click="toggleFullscreen"
           >
             <PlayerIcon :name="isFullscreen ? 'fullscreenExit' : 'fullscreen'" :size="18" />
+          </button>
+        </div>
+
+        <div class="controls-collapse-row">
+          <button type="button" class="controls-collapse-btn" aria-label="收起播放器全部菜单" @click="hidePlayerMenus">
+            <PlayerIcon name="chevronDown" :size="13" />
+            收起菜单
           </button>
         </div>
       </div>
@@ -1981,28 +1998,28 @@ defineExpose({ play })
   font-size: 7.5px;
   letter-spacing: 0.03em;
 }
-.settings-dismiss {
+
+.controls-collapse-row {
   display: flex;
-  width: 100%;
-  align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 8px 10px;
-  border: 1px solid rgba(243, 239, 228, 0.12);
-  border-radius: 7px;
-  color: rgba(243, 239, 228, 0.6);
-  background: rgba(243, 239, 228, 0.03);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+  margin-top: 5px;
 }
-.settings-dismiss:hover {
-  color: #f3efe4;
-  border-color: rgba(243, 239, 228, 0.3);
-  background: rgba(243, 239, 228, 0.07);
+.controls-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 0;
+  color: rgba(243, 239, 228, 0.28);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+.controls-collapse-btn:hover {
+  color: rgba(243, 239, 228, 0.78);
 }
 
 .player-caption {
